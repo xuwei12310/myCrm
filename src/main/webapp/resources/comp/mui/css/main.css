@@ -1,0 +1,72 @@
+html, body {
+    height: 100%;
+}
+html {
+    font-family: "Helvetica Neue", Helvetica, STHeiTi, Arial, sans-serif;
+    font-size: 62.5%;
+}
+body {
+    margin: 0;
+    font-size: 1.0rem;
+    line-height: 1.5;
+    color: #333;
+    background-color: #fff;
+    user-select: none; }
+
+article, aside, details, figcaption, figure, footer, header, hgroup, main, nav, section, summary {
+    display: block; }
+
+audio, canvas, progress, video {
+    display: inline-block;
+    vertical-align: baseline; }
+
+a {
+    background: transparent;
+    text-decoration: none;
+    color: #08c; }
+
+body th {
+    background-color: #DCDCDC;
+    
+    border: 1px solid #e9ecf5;
+    height: 45px;
+    text-align: center;
+    font-weight: normal;
+}
+body td {
+    background-color: #fafbff;
+    height: 25px;
+    text-align: center;
+}
+
+body .data-table {
+    margin: 0.5rem 0.5rem 0;
+    overflow: hidden;
+}
+
+body .data-table .t_l {
+    width: 35px;
+    float: left;
+}
+body .data-table .t_l table {
+    width: 100%;
+}
+body .data-table .t_l table th {
+    border-bottom: 0;
+    border-right: 0;
+}
+body .data-table .t_r {
+    margin-left: 35px;
+}
+body .data-table .t_r table {
+    width: 520px;
+        font-size: 1.0rem;
+}
+body .data-table .t_r table th {
+    border-bottom: 0;
+    width: 75px;
+    background-color: #DCDCDC;
+}
+body .data-table .t_r .t_r_content {
+    width: 100%;
+    overflow: hidden; }

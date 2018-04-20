@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderIncomeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderIncome">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="cost_type_id" property="costType.id" />
+		<result column="estimate_amount" property="estimateAmount" />
+		<result column="receive_amount" property="receiveAmount" />
+		<result column="received_amount" property="receivedAmount" />
+		<result column="receiving_amount" property="receivingAmount" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id 'order.id', <!-- 订单-->
+		a.cost_type_id 'costType.id', <!-- 费用类型-->
+		b.name 'costType.name',
+		a.estimate_amount estimateAmount, <!-- 预计金额-->
+		a.receive_amount receiveAmount, <!-- 实收金额（元）-->
+		a.received_amount receivedAmount, <!-- 已收金额（元）-->
+		a.receiving_amount receivingAmount, <!-- 未收金额（元）-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+	<select id="listByPage" resultType="com.xuwei.bean.OrderIncome">
+		select <include refid="baseColumns"></include>
+		from t_order_income a
+		left join t_dict b on a.cost_type_id =b.id
+		left join t_order c on a.order_id =c.id
+		<where>
+			<if test="m!=null and m.order!=null and m.order.id!=null">
+				c.id=#{m.order.id}
+			</if>
+		</where>
+	</select>
+</mapper>

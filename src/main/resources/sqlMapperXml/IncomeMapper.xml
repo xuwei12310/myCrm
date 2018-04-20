@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.IncomeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Income">
+		<id column="id" property="id" />
+		<result column="income_time" property="incomeTime" />
+		<result column="amount" property="amount" />
+		<result column="order_id" property="order.id" />
+		<result column="billing" property="billing" />
+		<result column="pay_type_id" property="payType.id" />
+		<result column="period_time_id" property="periodTime.id" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+		
+	</resultMap>
+	<!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		income_time incomeTime, <!-- 时间（年月日）-->
+		amount amount, <!-- 金额（元）-->
+		order_id orderId, <!-- 订单-->
+		billing billing, <!-- 是否开票（1是0否）-->
+		pay_type_id payTypeId, <!-- 付款方式-->
+		period_time_id periodTimeId, <!-- 期次-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+	<select id="listIncomeByPage" resultType="com.xuwei.bean.Income">
+		select 
+			a.id 'id',
+			a.income_time 'incomeTime',
+			a.amount 'amount',
+			a.order_id 'order.id',
+			c.order_code 'order.orderCode',
+			b.id 'order.customer.id',
+			b.customer_name 'order.customer.customerName',
+			a.billing 'billing',
+			a.pay_type_id 'payType.id',
+			d.name 'payType.name',
+			a.period_time_id 'periodTime.Id',
+			e.name 'periodTime.name',
+			a.note 'notes',
+			f.name 'ownerName',
+			a.note
+			FROM t_income a 
+			LEFT JOIN t_order c on a.order_id = c.id
+			LEFT JOIN t_customer b on c.customer_id=b.id
+			LEFT JOIN t_user f on c.owner_id = f.id
+			LEFT JOIN t_dict d on a.pay_type_id = d.id
+			LEFT JOIN t_dict e on a.period_time_id = e.id
+			LEFT JOIN t_user g on g.id=a.creator_id
+			LEFT JOIN t_organization h on h.id=g.organization_id
+			where 1=1
+			<if test="m!=null and m.incomeTime != null">
+				and a.income_time like concat("%",#{m.incomeTime},"%")
+			</if>
+			<if test="m!=null and m.order != null and m.order.customer!=null and m.order.customer.customerName!=null">
+				and b.customer_name like concat("%",#{m.order.customer.customerName},"%")
+			</if>
+			<if test="ew!=null and ew.sqlSegment!=null">
+				${ew.sqlSegment}
+			</if>
+			order by a.income_time desc
+			
+			
+	</select>
+    
+	 <!-- 获取所有用户信息 -->
+	<select id="getOwnerByList" resultType="com.xuwei.bean.User">
+		select 
+			id,username,name
+		from t_user
+		where 1=1
+			<if test="userName != null">
+				and name like "%"#{userName}"%"
+			</if>
+	</select>
+	<select id="getIncomeItemList" resultType="java.util.Map">
+		select a.* from 
+		(
+			select id,'回款（万元）' name,receive_amount 'receiveAmount',received_amount 'receivedAmount',receiving_amount 'receivingAmount','' pay,2 'type',note from t_order_loan
+			where order_id=#{orderId}
+				union 
+			select a.id, concat(b.`name`,"（元）")'name',receive_amount 'receiveAmount',received_amount 'receivedAmount',receiving_amount 'receivingAmount','' pay,1 'type',a.note 
+			from t_order_income a 
+			LEFT JOIN t_dict b on b.id=a.cost_type_id
+			where a.order_id=#{orderId}
+		) a
+			
+	</select>
+</mapper>

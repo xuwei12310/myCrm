@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.AssessmentCompanyMapper">
+
+	<!-- 通用查询映射结果 -->
+<resultMap id="BaseResultMap" type="com.xuwei.bean.AssessmentCompany">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="address" property="address" />
+		<result column="contacts" property="contacts" />
+		<result column="telephone" property="telephone" />
+		<result column="is_sys" property="isSys" />
+		<result column="array" property="array" />
+		<result column="status" property="status" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	
+ 
+   <!-- 取下个排序值 -->
+    <select id="nextArray" resultType="int">
+        select
+            case 
+                when max(array) is null then 1
+                else (max(array) + 1)
+            end
+        from t_assessment_company
+    </select>
+       <update id="changeArray" >
+        UPDATE t_assessment_company
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_assessment_company where  id=#{destId})
+                        else (select array from t_assessment_company where id=#{srcId})
+                    END array
+            FROM t_assessment_company
+            where id in (#{srcId},#{destId})) a ON t_assessment_company.id=a.id
+        SET t_assessment_company.array=a.array
+  </update>
+  <select id="listAssessmentCompanyByOrder" resultMap="BaseResultMap">
+  		select a.* from t_assessment_company a
+			left join t_order_company b on a.id=b.assessment_company_id
+			where b.order_id=#{id} and b.is_assessment=1
+  </select>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderReceivablesMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderReceivables">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="account_type" property="accountType" />
+		<result column="account_name" property="accountName" />
+		<result column="account_bank" property="accountBank" />
+		<result column="account_number" property="accountNumber" />
+		<result column="reason" property="reason" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- id-->
+		order_id orderId, <!-- 订单-->
+		account_type accountType, <!-- 账户类型1公司2客户-->
+		account_name accountName, <!-- 账户名-->
+		account_bank accountBank, <!-- 开户行-->
+		account_number accountNumber, <!-- 账号-->
+		reason reason, <!-- 理由-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+
+</mapper>

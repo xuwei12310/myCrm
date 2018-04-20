@@ -1,0 +1,161 @@
+@charset "utf-8";
+
+#main .theme-header-layout {
+    /*height: 46px !important;*/
+    background: #4bc1e9;
+    height: 46px;
+}
+
+#main .theme-navigate {
+    overflow: hidden;
+    clear: both;
+    padding: 0px;
+}
+
+
+#main .easyui-layout{
+    height:46px;
+}
+
+
+
+.m-header .l-btn-text{
+    color: #fff;
+}
+
+#main .theme-left-user-panel{
+    text-align: center;
+}
+
+
+.m-header .l-btn{
+    background-color: rgba(255, 255, 255, 0.0);
+    color: #fff;
+}
+
+#main .l-btn:hover{
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #333;
+}
+
+#main .theme-left-layout{
+    background-color: #324056;
+    color: #fff;
+    moz-user-select: -moz-none;
+    -moz-user-select: none;
+    -o-user-select:none;
+    -khtml-user-select:none;
+    -webkit-user-select:none;
+    -ms-user-select:none;
+    user-select:none;
+}
+
+#main .theme-left-layout .theme-left-switch{
+    background:none;
+}
+#main .panel-icon {
+    height:28px;
+    width:28px;
+    margin: -15px 0px 0px 5px;
+}
+#main .iconfont{
+    font-size: 20px;
+}
+#main .panel-title{
+    font-size: 14px;
+    padding-left: 30px;
+}
+
+#main .accordion-header{
+    height: 35px;
+    line-height: 35px;
+}
+
+#main .accordion-header:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+
+
+#main .accordion-header>.panel-title{
+    line-height: 40px;
+}
+
+.searchDiv {
+	height: 33px;
+	padding: 5px
+}
+.tdFirstTitle {
+	text-align: right;
+	padding: 10px 5px 5px 15px;
+}
+
+.tdFirstContent {
+	font-size: 13px;
+	padding-top: 10px;
+    padding-bottom: 5px;
+}
+
+.tdTitle {
+	text-align: right;
+	padding: 5px 5px 0px 15px;
+}
+
+.tdContent {
+	padding-top: 5px;
+}
+
+.contentInput {
+	width: 200px;
+}
+.searchConditonDiv{
+	height: 33px;
+	padding: 5px
+}
+.dateInput{
+	border:solid 1px #CCCCCC;padding: 5px 0px;width:198px;
+}
+.parting_line{
+    padding-left: 30px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    background-color: rgba(158, 147, 147, 0.12);
+}
+.header {
+    height: 68px;
+    overflow: hidden;
+    background-color: #40AAE6;
+}
+.logo {
+    float: left;
+    margin: 10px 30px;
+}
+#main .m-header{
+	height:68px;
+}
+#main .menu_top {
+    float: left;
+    font-size: 14px;
+    border: solid 1px #66BBEB;
+    cursor: pointer;
+    width: 80px;
+    height: 66px;
+    text-align: center;
+}
+.menu_top-img{
+	margin-top:2px;
+}
+.menu_top img{
+	width:56px;
+	height:40px;
+}
+div.menu_top:hover{
+ 	background-color:#2095d9;
+}
+.menu_top::-moz-selection{
+ 	background-color:#0080cc;
+}
+
+.move{
+    cursor:move;
+}

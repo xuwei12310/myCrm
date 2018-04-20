@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.ConsumerCarMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.ConsumerCar">
+		<id column="id" property="id" />
+		<result column="customer_id" property="customerId" />
+		<result column="brand" property="brand" />
+		<result column="model" property="model" />
+		<result column="years" property="years" />
+		<result column="car_status" property="carStatus" />
+		<result column="valuation" property="valuation" />
+		<result column="attach_id" property="attachId" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		customer_id customerId, <!-- 客户-->
+		brand brand, <!-- 品牌-->
+		model model, <!-- 型号-->
+		years years, <!-- 年份-->
+		car_status carStatus, <!-- 车况-->
+		valuation valuation, <!-- 估值-->
+		attach_id attachId, <!-- 附件-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+	
+	<select id="getConsumerCarList" resultType="com.xuwei.bean.ConsumerCar">
+		select * 
+		from t_consumer_car
+		where customer_id = #{customerid}
+	</select>
+</mapper>

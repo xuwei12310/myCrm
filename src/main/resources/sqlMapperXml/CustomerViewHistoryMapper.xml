@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CustomerViewHistoryMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.CustomerViewHistory">
+		<id column="id" property="id" />
+		<result column="customer_id" property="customer.id" />
+		<result column="view_user_id" property="viewUser.id" />
+		<result column="view_time" property="viewTime" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- id-->
+		customer_id customerId, <!-- 客户-->
+		view_user_id viewUserId, <!-- 浏览者-->
+		view_time viewTime, <!-- 浏览时间-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+
+
+	<!-- 通用查询结果列 -->
+    <sql id="cvhbaseColumns">
+		a.id id, <!-- id-->
+		a.customer_id 'customer.id', <!-- 客户-->
+		b.customer_name 'customer.customerName',
+		a.view_user_id 'viewUser.id', <!-- 浏览者-->
+		c.name 'viewUser.name',
+		a.view_time viewTime, <!-- 浏览时间-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+    
+    <select id="listCustomerViewHistoryByPage" resultType="com.xuwei.bean.CustomerViewHistory">
+    	select <include refid="cvhbaseColumns" />
+    	from t_customer_view_history a
+    	LEFT JOIN t_customer b ON b.id = a.customer_id
+    	LEFT JOIN t_user c ON c.id = a.view_user_id
+    	where a.customer_id = #{m.customer.id}
+    </select>
+</mapper>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderMaterialMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderMaterial">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="material_id" property="materialId" />
+		<result column="name" property="name" />
+		<result column="notice" property="notice" />
+		<result column="number" property="number" />
+		<result column="is_finish" property="isFinish" />
+		<result column="attach_id" property="attachId" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id orderId, <!-- 订单-->
+		a.material_id materialId, <!-- 材料-->
+		a.name name, <!-- 注意事项-->
+		a.notice notice, <!-- 注意事项-->
+		a.number number, <!-- 份数-->
+		a.is_finish isFinish, <!-- 是否完成(1完成0未完成)-->
+		a.attach_id attachId, <!-- 附件-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+
+</mapper>

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CustomerComplaintMapper">
+
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.CustomerComplaint">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="order_code" property="order.orderCode" />
+		<result column="customer_id" property="customer.id" />
+		<result column="complaint_content" property="complaintContent" />
+		<result column="complaint_object_id" property="complaintObject.id" />
+		<result column="complaint_time" property="complaintTime" />
+		<result column="handle_id" property="handle.id" />
+		<result column="handle_details" property="handleDetails" />
+		<result column="handle_time" property="handleTime" />
+		<result column="status" property="status" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	<select id="listCustomerComplaintByPage" resultType="com.xuwei.bean.CustomerComplaint">
+		select
+		a.id 'id',
+		a.customer_id 'customer.id',
+		b.customer_name 'customer.customerName',
+        a.order_id 'order.id',
+		c.order_code 'order.orderCode',
+		a.complaint_content 'complaintContent',
+		a.complaint_object_id 'complaintObject.id',
+		e.username 'complaintObject.username',
+		e.name 'complaintObject.name',
+		a.complaint_time 'complaintTime',
+		a.handle_id 'handle.id',
+		d.username 'handle.username',
+		d.name 'handle.name',
+		a.handle_details 'handleDetails',
+		a.handle_time 'handleTime',
+		a.status 'status',
+		a.note 'note'
+		FROM t_Complaint a
+		LEFT JOIN t_customer b on b.id=a.customer_id
+		LEFT JOIN t_order c on c.id=a.order_id
+		LEFT JOIN t_user d on d.id=a.handle_id
+		LEFT JOIN t_user e on e.id=a.complaint_object_id
+		where 1 = 1
+		<if test="viewType == 1">
+    			<if test="m.complaintObject != null">
+    				<if test="m.complaintObject.organization != null">
+    					<if test="m.complaintObject.organization.id != '' and m.complaintObject.organization.id != null">
+    						and a.complaint_object_id IN (select j.id from t_user j where j.organization_id = #{m.complaintObject.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.complaintObject.organization == null">
+    					<if test="m.complaintObject.id != '' and m.complaintObject.id != null">
+    						and a.complaint_object_id = #{m.complaintObject.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.complaintObject == null">
+    				and 1=0
+    			</if>
+    	</if>
+    	<if test="viewType == 2">
+    			<if test="m.complaintObject != null and m.complaintObject.id != '' and m.complaintObject.id != null">
+    				and a.complaint_object_id = #{m.complaintObject.id}
+    			</if>
+    			<if test="m.complaintObject == null">
+    				and 1=0
+    			</if>
+    	</if>
+		<if test="m.complaintTime != null and m.note != null">
+			and a.complaint_time <![CDATA[ >= ]]> #{m.complaintTime} and a.complaint_time <![CDATA[<= ]]>  #{m.note}
+		</if>
+		
+		<if test="m.note != null and m.complaintTime == null">
+		    and a.complaint_time <![CDATA[<= ]]>  #{m.note}
+		</if>
+		<if test="m.complaintTime != null and m.note == null">
+		     and a.complaint_time <![CDATA[ >= ]]> #{m.complaintTime}
+		</if>
+		
+		<if test="m.complaintContent != null and m.complaintContent != ''">
+			and a.complaint_content like  concat("%",#{m.complaintContent},"%")
+		</if>
+		<if
+			test="m.customer != null and m.customer.customerName != '' and m.customer.customerName != null">
+			and b.customer_name like  concat("%",#{m.customer.customerName},"%")
+		</if>
+		<if test="m.order != null and m.order.orderCode != '' and m.order.orderCode != null">
+			and c.order_code like   concat("%",#{m.order.orderCode},"%")
+		</if>
+		<if
+			test="m.status!= '' and m.status != null">
+			and a.status like   concat("%",#{m.status},"%")
+		</if>
+		ORDER BY a.id DESC	
+	</select>
+	<!-- 获取客户信息 -->
+	<select id="getCustemerByList" resultType="com.xuwei.bean.Customer">
+		select
+		id,
+		customer_name
+		from t_customer
+		where 1=1
+		<if test="customerName != null">
+			and customer_name like   concat("%",#{customerName},"%")
+		</if>
+	</select>
+	<!-- 获取订单信息 -->
+	<select id="getOrderByList" resultType="com.xuwei.bean.Order">
+		select
+		t.id,
+        t.order_code as orderCode,
+        t.signing_date as signingDate,
+        t.estimate_finish_time as estimateFinishTime,
+        t.loan_amount as loanAmount
+		from t_order t
+		where 1=1
+		<if test="orderCode != null">
+			and t.order_code like  concat("%",#{orderCode},"%")
+		</if>
+		<if test="customerId != null">
+			and t.customer_id =#{customerId}
+		</if>
+	</select>
+	<!-- 获取用户信息 -->
+	<select id="getHandleByList" resultType="com.xuwei.bean.User">
+		select
+		t.id,
+		t.name,
+        t.username
+		from t_user t
+		where 1=1
+		<if test="userName != null">
+			and t.username like  concat("%",#{userName},"%")
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.FollowAttachMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.FollowAttach">
+		<id column="id" property="id" />
+		<result column="follow_id" property="follow.id" />
+		<result column="attach_id" property="attach.id" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+         a.id, 
+         a.follow_id AS 'follow.id',
+         a.attach_id AS 'attach.id',
+         a.note, 
+         a.creator_id AS creatorId, 
+         a.create_time AS createTime, 
+         a.last_modify_time AS lastModifyTime, 
+         a.last_modifier_id AS lastModifierId
+    </sql>
+	
+	<select id="selectByFollowId" resultType="FollowAttach">
+		select <include refid="Base_Column_List" ></include>
+			from t_follow_attach a
+			left join t_follow b on a.follow_id =b.id
+			left join t_attach c on a.attach_id= c.id
+			where b.id=#{id}
+	</select>
+	
+	<select id="selectByFAId" resultType="com.xuwei.bean.FollowAttach">
+		select <include refid="Base_Column_List" ></include>
+			from t_follow_attach a
+			left join t_follow b on a.follow_id =b.id
+			left join t_attach c on a.attach_id= c.id
+			where a.id=#{id}
+	</select>
+	
+	<delete id="delAttachIdPage">
+		delete from t_follow_attach
+		where attach_id = #{attachId}
+	</delete>
+	
+	<select id="findListByFollowId" resultType="com.xuwei.bean.FollowAttach">
+		select
+			 a.id, 
+	         a.follow_id AS 'follow.id',
+	         a.attach_id AS 'attach.id',
+	         c.path 'attach.path',
+	         c.name 'attach.name',
+	         c.extention 'attach.extention',
+	         a.note, 
+	         a.creator_id AS creatorId, 
+	         a.create_time AS createTime, 
+	         a.last_modify_time AS lastModifyTime, 
+	         a.last_modifier_id AS lastModifierId
+	    from t_follow_attach a
+		left join t_follow b on a.follow_id =b.id
+		left join t_attach c on a.attach_id= c.id
+		where a.follow_id = #{followId}
+	</select>
+</mapper>

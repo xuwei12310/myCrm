@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.AreaMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Area">
+		<id column="id" property="id" />
+		<result column="province_id" property="province.id" />
+		<result column="city_id" property="city.id" />
+		<result column="area_code" property="areaCode" />
+		<result column="area_name" property="areaName" />
+		<result column="show_name" property="showName" />
+		<result column="status" property="status" />
+		<result column="array" property="array" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		c.id id, <!-- id-->
+		c.province_id 'province.id', <!-- 省份-->
+		b.province_name 'province.provinceName', <!-- 省份-->
+		c.city_id 'city.id' , <!-- 城市-->
+		a.city_name 'city.cityName' , <!-- 城市-->
+		c.area_code areaCode, <!-- 区/县编号-->
+		c.area_name areaName, <!-- 区/县名称-->
+		c.show_name showName, <!-- 显示名称-->
+		c.status status, <!-- 状态1启用0禁用-->
+		c.array array, <!-- 排序-->
+		c.note note, <!-- 备注-->
+		c.creator_id creatorId, <!-- 创建人-->
+		c.create_time createTime, <!-- 创建时间-->
+		c.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		c.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+    <!-- 查询最大的arry字段 -->
+    <select id="maxArrayIndex" resultType="java.lang.Integer">
+        select max(array) from t_area
+     </select>
+    <!--  分页查询 -->
+     <select id="findListByPage" resultType="com.xuwei.bean.Area">
+        select 
+        <include refid="baseColumns"/>
+        from t_area c 
+        left join t_city a  on  c.city_id = a.id
+        left join t_province b on  a.province_id = b.id where   1 = 1 
+        <if test="m.province != null and m.province.id != null and m.province.id != ''">
+            and b.id = #{m.province.id}
+        </if>
+        <if test="m.city != null  and m.city.id != null and m.city.id != '' ">
+           and c.city_id =  #{m.city.id}
+        </if>
+        <if  test="m.areaCode != null and m.areaCode != ''">
+            and c.area_code like concat('%',#{m.areaCode},'%')
+        </if>
+         <if  test="m.areaName != null and m.areaName != ''">
+            and c.area_name like concat('%',#{m.areaName},'%')
+        </if>
+        <if test="m.status != null ">
+            and c.status = #{m.status}
+        </if>
+        <if  test="m.showName != null and m.showName != ''">
+            and c.show_name like concat('%',#{m.showName},'%')
+        </if>
+        order by c.array
+    </select>
+    
+    <!-- 上移下移 -->
+     <update id="changeArray" >
+        UPDATE t_area
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_area where  id=#{destId})
+                        else (select array from t_area where id=#{srcId})
+                    END array
+            FROM t_area
+            where id in (#{srcId},#{destId})) a ON t_area.id=a.id
+        SET t_area.array=a.array
+  </update>
+  <!-- 获取所有户籍地信息 -->
+	<select id="getPlaceByList" resultType="com.xuwei.bean.Area">
+		select 
+			c.id id, <!-- id-->
+			c.province_id 'province.id', <!-- 省份-->
+			b.province_name 'province.provinceName', <!-- 省份-->
+			c.city_id 'city.id' , <!-- 城市-->
+			a.city_name 'city.cityName' , <!-- 城市-->
+			c.area_code areaCode, <!-- 区/县编号-->
+			c.area_name areaName, <!-- 区/县名称-->
+			c.show_name showName, <!-- 显示名称-->
+			c.status status, <!-- 状态1启用0禁用-->
+			c.array array, <!-- 排序-->
+			c.note note, <!-- 备注-->
+			c.creator_id creatorId, <!-- 创建人-->
+			c.create_time createTime, <!-- 创建时间-->
+			c.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+			c.last_modifier_id lastModifierId <!-- 最后修改人-->
+		from t_area c 
+        left join t_city a  on  c.city_id = a.id
+        left join t_province b on  a.province_id = b.id
+        where 1=1 and a.status=1
+        	<if test="areaName != null">
+        		and c.area_name like concat('%', #{areaName}, '%')    
+        	</if>
+	</select>
+	
+	<select id="queryAllArea" resultType="com.xuwei.bean.Area">
+		select 
+			a.id id, <!-- id-->
+			a.province_id 'province.id',
+			a.city_id 'city.id' ,
+			a.area_name areaName, <!-- 区/县名称-->
+			a.show_name showName <!-- 显示名称-->
+		from t_area a
+		left join t_city c  on  a.city_id = c.id
+        left join t_province b on  a.province_id = b.id
+        where a.status=1
+	</select>
+	
+	<select id="getCityToArea" resultType="com.xuwei.bean.Area">
+		select 
+			id id, <!-- id-->
+			area_name areaName, <!-- 区/县名称-->
+			show_name showName <!-- 显示名称-->
+		from t_area
+        where status=1 and city_id = #{cityId}
+	</select>
+</mapper>

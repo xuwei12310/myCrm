@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.BankMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Bank">
+		<id column="id" property="id" />
+		<result column="bank_name" property="bankName" />
+		<!-- <result column="bank_code" property="bankCode" />
+		<result column="address" property="address" />
+		<result column="contacts" property="contacts" />
+		<result column="phone" property="phone" /> -->
+		<result column="status" property="status" />
+		<result column="is_sys" property="isSys" />
+		<result column="array" property="array" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	
+ 
+   <!-- 取下个排序值 -->
+    <select id="nextArray" resultType="int">
+        select
+            case 
+                when max(array) is null then 1
+                else (max(array) + 1)
+            end
+        from t_bank
+    </select>
+    <select id="selectStatisticsByPage" resultType="com.xuwei.bean.Order">
+      SELECT
+        b.bank_name 'bank.bankName',
+        SUM(a.loan_amount) loanAmount,
+        SUM(a.company_loan_amount) companyLoanAmount,
+        SUM(a.company_loan_interest) companyLoanInterest,
+        SUM(a.loan_money) loanMoney,
+        SUM(a.service_charge) serviceCharge,
+        sum(a.cost) cost,
+        sum(a.brokerage_total) brokerageTotal
+      FROM
+        t_order a
+      LEFT JOIN t_bank b ON a.bank_id = b.id
+        <if test="ew!=null and ew.sqlSegment!=null">
+            ${ew.sqlSegment}
+        </if>
+      GROUP BY
+        b.id
+    </select>
+    <update id="changeArray" >
+        UPDATE t_bank
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_bank where  id=#{destId})
+                        else (select array from t_bank where id=#{srcId})
+                    END array
+            FROM t_bank
+            where id in (#{srcId},#{destId})) a ON t_bank.id=a.id
+        SET t_bank.array=a.array
+  </update>
+  
+</mapper>

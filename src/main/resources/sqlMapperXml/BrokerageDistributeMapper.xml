@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.BrokerageDistributeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.BrokerageDistribute">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="owner_type" property="ownerType" />
+		<result column="owner_id" property="owner.id" />
+		<result column="reference" property="reference" />
+		<result column="actual" property="actual" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id 'order.id', <!-- 订单Id-->
+		b.order_code 'order.orderCode',
+		a.owner_type ownerType, <!-- 拥有人类型-->
+		a.owner_id 'owner.id', <!-- 拥有人id-->
+		c.name 'owner.name',
+		a.reference reference, <!-- 参考值-->
+		a.actual actual, <!-- 实际值-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+
+	<select id="listBrokerageByPage" resultType="com.xuwei.bean.BrokerageDistribute">
+		select
+			<include refid="baseColumns" />
+		from t_brokerage_distribute a
+		LEFT JOIN t_order b ON b.id = a.order_id
+    	LEFT JOIN t_user c ON c.id = a.owner_id
+    	where a.order_id = #{m.order.id}
+    	ORDER BY a.owner_type ASC	
+	</select>
+	<select id="getOrderBrokerageById" resultType="com.xuwei.bean.Order">
+		select
+			a.id id, <!-- id-->
+			a.order_code orderCode, <!-- 订单编号(年月日+两位流水）-->
+			a.customer_id "customer.id", <!-- 客户-->
+			b.customer_name "customer.customerName",
+			a.signing_date signingDate, <!-- 签约日期（年月日）-->
+			a.loan_amount loanAmount, <!-- 贷款金额（万元）-->
+			a.lending_rate lendingRate, <!-- 月利率（厘/月）-->
+			a.commission_amount commissionAmount, <!-- 返佣金额-->
+			a.commission_rate commissionRate, <!-- 返佣比例-->
+			a.cs_assistant_id "csAssistant.id", <!-- 客服助理-->
+			g.name "csAssistant.name",
+			a.cs_principal_id "csPrincipal.id", <!-- 客服负责人-->
+			h.name "csPrincipal.name",
+			a.follow_user_id "followUser.id", <!-- 跟单人-->
+			i.name "followUser.name",
+			a.owner_id "owner.id", <!-- 拥有人-->
+			j.name "owner.name",
+			a.cost cost, <!-- 订单成本（元）-->
+			a.receive_amount receiveAmount, <!-- 应收金额（元）-->
+			a.pay_amount payAmount, <!-- 应付金额（元）-->
+			a.company_loan_amount companyLoanAmount, <!-- 借款总金额（万元）-->
+			a.company_loan_interest companyLoanInterest, <!-- 借款利息总额（元）-->
+			a.loan_date loanDate, <!-- 放款日期-->
+			a.loan_money loanMoney, <!-- 放款金额-->
+			a.settlement_charge settlementCharge, <!-- 结算手续费-->
+			a.settlement_clerk settlementClerk, <!-- 结算员-->
+			a.note note, <!-- 备注-->
+			a.brokerage_audit_status brokerageAuditStatus,
+			a.brokerage_grant_state brokerageGrantState,
+			a.brokerage_total brokerageTotal
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where a.id = #{orderId}
+	</select>
+		
+	<select id="getBrokerageList" resultType="com.xuwei.bean.BrokerageDistribute">
+		select
+			<include refid="baseColumns" />
+		from t_brokerage_distribute a
+		LEFT JOIN t_order b ON b.id = a.order_id
+    	LEFT JOIN t_user c ON c.id = a.owner_id
+    	where a.order_id = #{orderId}
+	</select>
+    <select id="getCommissionStatisticsList" resultType="com.xuwei.bean.BrokerageDistribute">
+		SELECT
+			a.owner_type,
+			a.owner_id 'owner.id',
+			c.`name` 'owner.name',
+			SUM(actual) 'total',
+			SUM(CASE when b.brokerage_grant_state=1 THEN actual else 0 END) 'grant',
+			SUM(CASE when b.brokerage_grant_state=0 THEN actual else 0 END) 'ungrant'
+		FROM
+			t_brokerage_distribute a
+		LEFT JOIN t_order b ON b.id=a.order_id
+		LEFT JOIN t_user c ON c.id=a.owner_id
+		<if test="ew!=null and ew.sqlSegment!=null">
+			${ew.sqlSegment}
+		</if>
+		GROUP BY a.owner_id
+	</select>
+	<select id="grantOrderList" resultType="com.xuwei.bean.BrokerageDistribute">
+		SELECT
+			a.id,
+			b.order_code 'order.orderCode',
+			d.customer_name 'order.customer.customerName',
+			b.loan_date 'order.loanDate',
+			a.actual
+		FROM
+			t_brokerage_distribute a
+		LEFT JOIN t_order b ON b.id = a.order_id
+		LEFT JOIN t_user c ON c.id = a.owner_id
+		LEFT JOIN t_customer d ON d.id=b.customer_id
+		<if test="ew!=null and ew.sqlSegment!=null">
+			${ew.sqlSegment}
+		</if>
+	</select>
+</mapper>

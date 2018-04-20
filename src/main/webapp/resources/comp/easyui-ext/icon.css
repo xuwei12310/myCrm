@@ -1,0 +1,63 @@
+.icon-exit{
+	background:url('icons/exit.png') no-repeat  center;
+}
+.icon-attach{
+	background:url('icons/attach.png') no-repeat  center;
+}
+.icon-resources{
+	background:url('icons/resources.png') no-repeat center center;
+}
+.icon-role{
+	background:url('icons/role.png') no-repeat center center;
+}
+.icon-house{
+	background:url('icons/house.png') no-repeat center center;
+}
+.icon-resetPwd{
+	background:url('icons/resetPwd.png') no-repeat center center;
+}
+.icon-system{
+	background:url('icons/system.png') no-repeat center center;
+}
+.icon-download{
+	background:url('icons/download.png') no-repeat center center;
+}
+.icon-upload{
+	background:url('icons/upload.png') no-repeat center center;
+}
+.icon-close{
+	background:url('icons/close.png') no-repeat center center;
+}
+.icon-open{
+	background:url('icons/open.png') no-repeat center center;
+}
+.icon-view{
+	background:url('icons/view.png') no-repeat center center;
+}
+.icon-excel{
+	background:url('icons/excel.png') no-repeat center center;
+}
+.icon-up{
+	background:url('icons/up.png') no-repeat center center;
+}
+.icon-down{
+	background:url('icons/down.png') no-repeat center center;
+}
+.icon-basket_put{
+	background:url('icons/basket_put.png') no-repeat center center;
+}
+.icon-basket_remove{
+	background:url('icons/basket_remove.png') no-repeat center center;
+}
+.icon-info{
+	background:url('icons/info.png') no-repeat center center;
+}
+.icon-warn{
+	background:url('icons/warn.png') no-repeat center center;
+}
+.icon-status{
+	background:url('icons/status.png') no-repeat center center;
+}
+.icon-email{
+	background:url('icons/email.png') no-repeat center center;
+}

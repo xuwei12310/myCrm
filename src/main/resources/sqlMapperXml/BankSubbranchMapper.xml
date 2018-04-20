@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.BankSubbranchMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.BankSubbranch">
+		<id column="id" property="id" />
+		<result column="subbranch_name" property="subbranchName" />
+		<result column="bank_code" property="bankCode" />
+		<result column="bank_id" property="bank.id"/>
+		<result column="address" property="address" />
+		<result column="contacts" property="contacts" />
+		<result column="phone" property="phone" />
+		<result column="status" property="status" />
+		<result column="array" property="array" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	
+ 
+   <!-- 取下个排序值 -->
+    <select id="nextArray" resultType="int">
+        select
+            case 
+                when max(array) is null then 1
+                else (max(array) + 1)
+            end
+        from t_bank_subbranch
+    </select>
+       <update id="changeArray" >
+        UPDATE t_bank_subbranch
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_bank_subbranch where  id=#{destId})
+                        else (select array from t_bank_subbranch where id=#{srcId})
+                    END array
+            FROM t_bank_subbranch
+            where id in (#{srcId},#{destId})) a ON t_bank_subbranch.id=a.id
+        SET t_bank_subbranch.array=a.array
+  </update>
+  <select id="listBankByOrder" resultMap="BaseResultMap">
+  		select a.* from 
+		t_bank_subbranch a 
+		LEFT JOIN t_order_bank b on a.id=b.bank_id
+		where b.order_id=#{id}
+  </select>
+</mapper>

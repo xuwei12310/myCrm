@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.RoleResourcesMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.RoleResources">
+		<id column="id" property="id" />
+		<result column="role_id" property="roleId" />
+		<result column="resources_id" property="resourcesId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+	</resultMap>
+	<sql id="baseColumns">
+		id, role_id, resources_id, create_time, last_modify_time
+	</sql>
+
+	<insert id="insert" parameterType="RoleResources">
+		insert into t_role_resources (<include refid="baseColumns" />)
+		values (#{id,jdbcType=BIGINT}, #{roleId,jdbcType=BIGINT}, #{resourcesId,jdbcType=BIGINT},
+		#{createTime,jdbcType=VARCHAR}, #{lastModifyTime,jdbcType=VARCHAR})
+	</insert>
+
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into t_role_resources (id, role_id, resources_id, create_time, last_modify_time) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},#{item.roleId},#{item.resourcesId},#{item.createTime},#{item.lastModifyTime})
+		</foreach>
+	</insert>
+	<delete id="mulDelete" parameterType="java.lang.String">
+		delete from t_role_resources
+		where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<delete id="deleteBatchByRoleIdAndResourcesId"  parameterType="java.util.List">
+		delete from t_role_resources
+		<where>
+			<foreach collection="list" item="item" index="index" separator=" or ">
+				(role_id = #{item.roleId} and resources_id = #{item.resourcesId})
+			</foreach>
+		</where>
+	</delete>
+
+	<select id="getGrantResources" resultType="long">
+		select a.resources_id
+		from t_role_resources a
+		where a.role_id = #{roleId}
+	</select>
+</mapper>

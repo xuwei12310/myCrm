@@ -1,0 +1,66 @@
+<%@page language="java" contentType="text/html; charset=utf-8" pageEncoding="UTF-8"%>
+<%@include file="/WEB-INF/jsp/common/tag.jsp"%>
+<%
+  request.setAttribute("resourceIdentity", "#if(${package.ModuleName})${package.ModuleName}#end:${table.entityPath}");
+%>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>$!{tableDto.comment}列表</title>
+  <base href="${ctx}">
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%@include file="/WEB-INF/jsp/common/css.jsp"%>
+  <script type="text/javascript">
+		var ctx = "${ctx}";
+		var resourceName = "$!{table.comment}";
+		var resourcePath = "/admin#if(${package.ModuleName})/${package.ModuleName}#end/${table.entityPath}";
+  </script>
+  <%@include file="/WEB-INF/jsp/common/js.jsp"%>
+  <script type="text/javascript" src="${ctx}/resources/js/common/crud.js"></script>
+  <script type="text/javascript" src="${ctx}/resources/js/admin#if(${package.ModuleName})/${package.ModuleName}#end/${table.entityPath}.js"></script>
+  <script type="text/javascript">
+	$(function () {
+		${table.entityPath}.init();
+	})
+  </script>
+</head>
+<body class="easyui-layout">
+	<div data-options="region:'north',border:false" class="searchDiv">
+		<form id="searchForm" method="post">
+#set($list=${table.fields})
+#foreach($field in $list)
+	#if(${field.propertyName}!='id'&&${field.propertyName}!='createTime'&&${field.propertyName}!='creatorId'&&${field.propertyName}!='lastModifyTime'&&${field.propertyName}!='lastModifierId'&&${field.propertyName}!='note'&&${field.propertyName}!='array')
+			<input class="easyui-textbox" name="${field.propertyName}" style="width:180px" data-options="label:'${field.comment}',labelWidth:70">
+	#end
+#end
+			<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-search'" id="searchBtn">查询</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton" data-options="iconCls:'icon-clear'" id="clearBtn">清空</a>
+		</form>
+	</div>
+	<div data-options="region:'center'">
+		<table id="list" data-options="border:false"></table>
+	</div>
+	<div id="tb">
+		<%@include file="/WEB-INF/jsp/common/btn.jsp"%>
+	</div>
+	<div id="editDialog">
+		<form id="editForm" method="post">
+			<input type="hidden" name="id">
+            <table >
+#set($list=${table.fields})
+#foreach($field in $list)
+	#if(${field.propertyName}!='id'&&${field.propertyName}!='createTime'&&${field.propertyName}!='creatorId'&&${field.propertyName}!='lastModifyTime'&&${field.propertyName}!='lastModifierId'&&${field.propertyName}!='note'&&${field.propertyName}!='array')
+		<tr>
+					<td class="tdFirstTitle">${field.comment}</td>
+					<td class="tdFirstContent">
+						<input class="easyui-textbox" id="${field.propertyName}" name="${field.propertyName}" style="width:100%" data-options="required:true">
+					</td>
+				</tr>
+	#end
+#end
+            </table>
+		</form>
+	</div>
+</body>
+</html>

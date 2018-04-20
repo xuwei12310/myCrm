@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderLoanMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderLoan">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="amount" property="amount" />
+		<result column="begin_date" property="beginDate" />
+		<result column="repay_date" property="repayDate" />
+		<result column="rate" property="rate" />
+		<result column="loan_day" property="loanDay" />
+		<result column="interest" property="interest" />
+		<result column="refer_interest" property="referInterest" />
+		<result column="estimate_repay_date" property="estimateRepayDate" />
+		<result column="estimate_loan_day" property="estimateLoanDay" />
+		<result column="estimate_interest" property="estimateInterest" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="receive_amount" property="receiveAmount" />
+		<result column="receiving_amount" property="receivingAmount" />
+		<result column="received_amount" property="receivedAmount" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id 'order.id', <!-- 订单-->
+		a.amount 'amount', <!-- 借款金额（万元）-->
+		a.begin_date 'beginDate', <!-- 借款日期-->
+		a.repay_date 'repayDate', <!-- 还款日期-->
+		a.rate 'rate', <!-- 借款利率-->
+		a.loan_day 'loanDay', <!-- 借款天数-->
+		a.interest 'interest', <!-- 利息（元）-->
+		a.refer_interest 'referInterest',<!-- 参考利息 -->
+		a.estimate_repay_date 'estimateRepayDate', <!-- 预计还款日期-->
+		a.estimate_loan_day 'estimateLoanDay', <!-- 预计借款天数-->
+		a.estimate_interest 'estimateInterest', <!-- 预计利息（元）-->
+		a.audit_status 'auditStatus', <!-- 审核状态（1草稿2审核中3审核通过4审核不通过）-->
+		a.receive_amount 'receiveAmount', <!-- 应收金额（元）-->
+		a.receiving_amount 'receivingAmount', <!-- 已收金额（元）-->
+		a.received_amount 'receivedAmount', <!-- 未收金额（元）-->
+		a.note note, <!-- 备注-->
+		a.creator_id 'creatorId', <!-- 创建人-->
+		a.create_time 'createTime', <!-- 创建时间-->
+		a.last_modify_time 'lastModifyTime', <!-- 最后修改时间-->
+		a.last_modifier_id 'lastModifierId' <!-- 最后修改人-->
+    </sql>
+    
+	<select id="listByPage" resultType="com.xuwei.bean.OrderLoan">
+		select <include refid="baseColumns"></include>
+		from 
+		t_order_loan a
+		left join
+		t_order b on a.order_id=b.id
+		<where>
+			<if test="orderLoan!=null and orderLoan.order!=null and orderLoan.order.id!=null">
+				b.id=#{orderLoan.order.id}
+			</if>
+		</where>
+	</select>
+</mapper>

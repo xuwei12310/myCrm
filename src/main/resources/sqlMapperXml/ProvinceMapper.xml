@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.ProvinceMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Province">
+		<id column="id" property="id" />
+		<result column="province_code" property="provinceCode" />
+		<result column="province_name" property="provinceName" />
+		<result column="status" property="status" />
+		<result column="array" property="array" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- id-->
+		province_code provinceCode, <!-- 省份编号-->
+		province_name provinceName, <!-- 省份名称-->
+		status status, <!-- 状态1启用0禁用-->
+		array array, <!-- 排序-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+    <!-- 查询最大的arry字段 -->
+    <select id="maxArrayIndex" resultType="java.lang.Integer">
+        select max(array) from t_province 
+     </select>
+     
+     <!-- 上移下移 -->
+     <update id="changeArray" >
+        UPDATE t_province 
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_province where  id=#{destId})
+                        else (select array from t_province where id=#{srcId})
+                    END array
+            FROM t_province
+            where id in (#{srcId},#{destId})) a ON t_province.id=a.id
+        SET t_province.array=a.array
+  </update>
+     
+   <select id="getAllProvince" resultMap="BaseResultMap">
+        select * from t_province  where t_province.status = 1 order by array asc
+   </select>
+     
+     
+</mapper>

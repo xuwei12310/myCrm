@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.TodoCommentMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.TodoComment">
+		<id column="id" property="id" />
+		<result column="todo_id" property="todoId.id" />
+		<result column="comment" property="comment" />
+		<result column="comment_time" property="commentTime" />
+		<result column="comment_user_id" property="commentUserId.id" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+   <!-- 通用查询结果列 -->
+	<sql id="baseColumns">
+		id id, 
+		todo_id todoId,
+		comment comment,
+		comment_time commentTime,
+		comment_user_id commentUserId,
+		note note, 
+		creator_id creatorId, 
+		create_time createTime,
+		last_modify_time lastModifyTime, 
+		last_modifier_id lastModifierId, 
+	</sql>
+
+	<select id="listCommentByPage" resultType="com.xuwei.bean.TodoComment">
+		select
+		a.id id,
+		a.todo_id 'todoId.id',
+		b.username 'commentUserId.username',
+		b.`name` 'commentUserId.name',
+		b.id  'commentUserId.id',
+		a.`comment` 'COMMENT',
+		a.comment_time commentTime
+		from t_todo_comment a
+		LEFT JOIN t_todo t on t.id=a.todo_id
+		LEFT JOIN t_user b on b.id=a.comment_user_id
+		where 1=1 
+		and a.todo_id=#{CommentTodoId}
+		ORDER BY a.id DESC
+	</select>
+	<select id="getCommentContent" resultType="com.xuwei.bean.TodoComment">
+		select
+		a.comment 'comment'
+		from t_todo_comment a
+		where 1=1 
+		and a.id=#{comentId}
+	</select>
+</mapper>

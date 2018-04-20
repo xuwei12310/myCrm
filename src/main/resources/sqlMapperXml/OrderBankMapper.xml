@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderBankMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderBank">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="bank_id" property="bank.id" />
+		<result column="is_sign" property="isSign" />
+		<result column="sing_time" property="singTime" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id "order.id", <!-- 订单-->
+		a.bank_id "bank.id", <!-- 银行-->
+		a.subbranch_id "subbranch.id", <!-- 合作银行支行-->
+		a.is_sign isSign, <!-- 是否签约银行(1签约0未签约)-->
+		a.sing_time singTime, <!-- 签约时间(年月日)-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId, <!-- 最后修改人-->
+	</sql>
+    <sql id="Base_Column_List">
+        a.id,
+        a.order_id  'order.id',
+        a.bank_id  'bank.id',
+        a.subbranch_id 'subbranch.id',
+        a.is_sign  'isSign',
+        a.sing_time  'singTime',
+        a.note,
+        a.creator_id  'creatorId',
+        a.create_time  'createTime',
+        a.last_modify_time  'lastModifyTime',
+        a.last_modifier_id  'lastModifierId'
+    </sql>
+	<select id="selectByOrderId" resultType="com.xuwei.bean.OrderBank">
+		select <include refid="Base_Column_List"></include>
+		from t_order_bank a
+		left join t_order b on b.id =a.order_id
+		left join t_bank c on c.id=a.bank_id
+		where b.id=#{id}
+		and a.is_sign=1
+	</select>
+    <select id="queryByPage" resultType="java.util.Map">
+		SELECT <include refid="baseColumns"/>
+		c.bank_name,b.subbranch_name,b.address,b.contacts,b.phone
+		FROM t_order_bank a
+		LEFT JOIN t_bank_subbranch b ON a.subbranch_id=b.id
+		LEFT JOIN t_bank c ON a.bank_id = c.id
+		WHERE a.order_id = #{orderId}
+	</select>
+    <select id="selectListByPage" resultType="com.xuwei.bean.OrderBank">
+		SELECT <include refid="baseColumns"/>
+		c.bank_name "bank.bankName",
+		b.subbranch_name "subbranch.subbranchName",
+		b.address "subbranch.address",
+		b.contacts "subbranch.contacts",
+		b.phone "subbranch.phone"
+		FROM t_order_bank a
+		LEFT JOIN t_bank_subbranch b ON a.subbranch_id=b.id
+		LEFT JOIN t_bank c ON a.bank_id = c.id
+		WHERE a.order_id = #{orderId}
+	</select>
+    <select id="getBankById" resultType="com.xuwei.bean.OrderBank">
+		SELECT <include refid="baseColumns"/>
+		c.bank_name "bank.bankName",
+		b.subbranch_name "subbranch.subbranchName",
+		b.address "subbranch.address",
+		b.contacts "subbranch.contacts",
+		b.phone "subbranch.phone"
+		FROM t_order_bank a
+		LEFT JOIN t_bank_subbranch b ON a.subbranch_id=b.id
+		LEFT JOIN t_bank c ON a.bank_id = c.id
+		WHERE a.id = #{id}
+	</select>
+</mapper>

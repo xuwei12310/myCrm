@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.ResourcesMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Resources">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="identity" property="identity" />
+		<result column="url" property="url" />
+		<result column="weight" property="weight" />
+		<result column="icon" property="icon" />
+		<result column="status" property="status" />
+		<result column="resources_type" property="resourcesType" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="note" property="note" />
+		<result column="parent_id" property="parentId" />
+		<result column="parent_ids" property="parentIds" />
+		<result column="creator_id" property="creatorId" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+	<delete id="deleteById" parameterType="java.lang.Long">
+		delete from t_resources
+		where id = #{id}
+	</delete>
+	<delete id="mulDelete" parameterType="java.lang.String">
+		delete from t_resources
+		where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<update id="update" parameterType="Resources">
+		update t_resources
+		set name = #{name,jdbcType=VARCHAR},
+		identity = #{identity,jdbcType=VARCHAR},
+		url = #{url,jdbcType=VARCHAR},
+		icon = #{icon,jdbcType=VARCHAR},
+		status = #{status,jdbcType=VARCHAR},
+		resources_type = #{resourcesType,jdbcType=VARCHAR},
+		last_modify_time = #{lastModifyTime,jdbcType=VARCHAR},
+		last_modifier_id = #{lastModifierId,jdbcType=BIGINT},
+		note = #{note,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateSelftAndChild" >
+		update t_resources
+		set name = #{name,jdbcType=VARCHAR},
+		identity = #{identity,jdbcType=VARCHAR},
+		url = #{url,jdbcType=VARCHAR},
+		icon = #{icon,jdbcType=VARCHAR},
+		status = #{status,jdbcType=VARCHAR},
+		resources_type = #{resourcesType,jdbcType=VARCHAR},
+		last_modify_time = #{lastModifyTime,jdbcType=VARCHAR},
+		last_modifier_id = #{lastModifierId,jdbcType=BIGINT},
+		note = #{note,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateByIdSelective" parameterType="Resources">
+		update t_resources
+		<set >
+			<if test="name != null" >
+				name = #{name},
+			</if>
+			<if test="identity != null" >
+				identity = #{identity},
+			</if>
+			<if test="url != null" >
+				url = #{url},
+			</if>
+			<if test="icon != null" >
+				icon = #{icon},
+			</if>
+			<if test="weight != null" >
+				weight = #{weight},
+			</if>
+			<if test="status != null" >
+				status = #{status},
+			</if>
+			<if test="resourcesType != null" >
+				resources_type = #{resourcesType},
+			</if>
+			<if test="note != null" >
+				note = #{note},
+			</if>
+			<if test="parentId != null" >
+				parent_id = #{parentId},
+			</if>
+			<if test="parentIds != null" >
+				parent_ids = #{parentIds},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateChildrenParentIds">
+		update t_resources
+		set parent_ids=#{newParentIds,jdbcType=VARCHAR}
+		where parent_ids like concat(#{oldParentIds,jdbcType=VARCHAR}, '%')
+	</update>
+
+
+	<sql id="Base_Column_List" >
+		id, name, identity, url, weight, icon, status, resources_type 'resourcesType', create_time, last_modify_time,
+		note, parent_id 'parentId', parent_ids 'parentIds', creator_id, last_modifier_id
+	</sql>
+	<select id="findById" resultType="com.xuwei.bean.Resources" parameterType="long">
+		select  <include refid="Base_Column_List" />
+		from t_resources
+		where id = #{id}
+	</select>
+
+
+	<select id="findSelfAndNextSiblings" resultType="com.xuwei.bean.Resources">
+		select  <include refid="Base_Column_List" />
+		from t_resources
+		WHERE parent_ids = #{parentIds} AND weight>=#{weight}
+		ORDER BY weight ASC
+	</select>
+
+
+
+	<sql id="findListWhere">
+		<where>
+			<if test="m.name != null and !&quot;&quot;.equals(m.name.trim())">
+				and a.name like  concat('%',#{m.name},'%')
+			</if>
+		</where>
+		ORDER BY a.weight asc
+	</sql>
+
+	<select id="findListByPage" resultType="Resources">
+		select  <include refid="Base_Column_List" />
+		from t_resources a
+		<include refid="findListWhere" />
+	</select>
+	<!-- 树节点查询列 -->
+	<sql id="tree_columns">
+		a.id,a.name,a.parent_id 'parentId',(select count(f_t.id) from t_resources f_t where f_t.parent_id = a.id) hasChildren
+	</sql>
+	<select id="treeRoot" resultType="com.xuwei.bean.Resources">
+		SELECT  <include refid="tree_columns" />
+		FROM  t_resources a
+		WHERE a.parent_id IS NULL
+		ORDER BY weight ASC
+	</select>
+	<select id="treeChildren" resultType="com.xuwei.bean.Resources">
+		SELECT  <include refid="tree_columns" />
+		FROM  t_resources a
+		WHERE a.parent_id = #{id}
+		ORDER BY weight ASC
+	</select>
+	<select id="tree" resultType="com.xuwei.bean.Resources">
+		SELECT  <include refid="tree_columns" />
+		FROM  t_resources a
+		WHERE a.parent_ids like '0/%'
+		ORDER BY a.parent_ids ASC,a.weight ASC
+	</select>
+
+	<sql id="findChildrenWhere">
+		<where>
+			<if test="m.id != null">
+				and a.parent_id = #{m.id}
+			</if>
+			<if test="m.name != null and !&quot;&quot;.equals(m.name.trim())">
+				and a.name like  concat('%',#{m.name},'%')
+			</if>
+		</where>
+		ORDER BY a.weight ASC
+	</sql>
+
+	<select id="findChildren" resultType="com.xuwei.bean.Resources">
+		select <include refid="Base_Column_List" />
+		from t_resources a
+		<include refid="findChildrenWhere" />
+	</select>
+
+	<select id="menuTreeChildren" resultType="com.xuwei.bean.Resources">
+		select  id, name,url,icon,identity,parent_id,(select count(f_t.id) from t_resources f_t where f_t.parent_id = a.id and f_t.resources_type = '菜单' and f_t.status='启用') hasChildren
+		from t_resources a
+		where a.resources_type = '菜单' and a.status='启用'
+		 and a.parent_id =#{parentId}
+		ORDER BY a.weight ASC
+	</select>
+
+	<select id="findChildrenByPage" resultType="com.xuwei.bean.Resources">
+		select <include refid="Base_Column_List" />
+		from t_resources a
+		<include refid="findChildrenWhere" />
+	</select>
+	<!-- 取下个权重值  -->
+	<select id="nextWeight" resultType="int">
+		select
+		case when max(weight) is null then 1
+		else (max(weight) + 1)
+		end
+		from t_resources
+		where parent_id=#{id}
+	</select>
+
+</mapper>

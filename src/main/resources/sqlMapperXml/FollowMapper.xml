@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.FollowMapper">
+
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Follow">
+		<id column="id" property="id" />
+		<result column="customer_id" property="customer.id" />
+		<result column="follow_time" property="followTime" />
+		<result column="follow_type_id" property="followType.id" />
+		<result column="follow_stage_id" property="followStage.id" />
+		<result column="follow_details" property="followDetails" />
+		<result column="follow_personnel_id" property="followPersonnel.id" />
+		<result column="source" property="source" />
+		<result column="front_status_id" property="frontStatus.id" />
+		<result column="after_status_id" property="afterStatus.id" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+	a.id,
+	b.id 'customer.id',
+	b.customer_name 'customer.customerName',
+	b.mobile_phone 'customer.mobilePhone',
+	a.follow_time 'followTime',
+	c.id 'followType.id',
+	c.name 'followType.name',
+	d.id 'followStage.id',
+	d.name 'followStage.name',
+	a.follow_details 'followDetails',
+	e.id  'customer.customerStatus.id',
+	e.name  'customer.customerStatus.name',
+	f.id  'followPersonnel.id',
+	f.name  'followPersonnel.name',
+	a.source,
+	g.id  'frontStatus.id',
+	g.name  'frontStatus.name',
+	h.id  'afterStatus.id',
+	h.name  'afterStatus.name',
+	a.note,
+	a.creator_id  'creatorId',
+	a.create_time  'createTime',
+	a.last_modify_time 'lastModifyTime',
+	a.last_modifier_id  'lastModifierId'
+    </sql>
+	<select id="listByPage" resultType="Follow">
+		select <include refid="Base_Column_List"></include> 
+		from 
+		t_follow  a 
+			left join t_customer b on a.customer_id=b.id
+			left join t_dict c on a.follow_type_id =c.id
+			left join t_dict d on a.follow_stage_id =d.id
+			left join t_dict e on e.id =b.customer_status_id
+			left join t_user f on a.follow_personnel_id =f.id
+			left join t_dict g on a.front_status_id =g.id
+			left join t_dict h on a.after_status_id =h.id
+			left join t_organization i on i.id=f.organization_id
+		<where>
+			<if test="search!=null">
+					b.customer_name like concat("%",#{search},"%")
+			</if>
+			<if test="m.customer!=null and m.customer.customerName!=null">
+				b.customer_name like concat("%",#{m.customer.customerName},"%")
+			</if>
+			<if test="m.customer!=null and m.customer.mobilePhone!=null">
+				b.mobile_phone like concat("%",#{m.customer.mobilePhone},"%")
+			</if>
+			<if test="m.followTimeMins != null and m.followTimeMaxs == null">
+    			and a.follow_time <![CDATA[ >= ]]> #{m.followTimeMins} 
+    		</if>
+    		<if test="m.followTimeMins == null and m.followTimeMaxs != null">
+    			and a.follow_time <![CDATA[ <= ]]> #{m.followTimeMaxs}
+    		</if>
+    		<if test="m.followTimeMins != null and m.followTimeMaxs != null">
+    			and a.follow_time <![CDATA[ <= ]]> #{m.followTimeMaxs} and a.follow_time <![CDATA[ >= ]]> #{m.followTimeMins}
+    		</if>
+    		<if test="ew!=null and ew.sqlSegment!=null">
+				${ew.sqlSegment}
+			</if>
+		</where>
+		order by a.follow_time desc
+	</select>
+	<select id="selectById" resultType="Follow">
+		select <include refid="Base_Column_List"/>
+		from 
+		t_follow  a 
+			left join t_customer b on a.customer_id=b.id
+			left join t_dict c on a.follow_type_id =c.id
+			left join t_dict d on a.follow_stage_id =d.id
+			left join t_dict e on e.id =b.customer_status_id
+			left join t_user f on a.follow_personnel_id =f.id
+			left join t_dict g on a.front_status_id =g.id
+			left join t_dict h on a.after_status_id =h.id
+		<where>
+			a.id=#{id}
+		</where>
+	</select>
+	<select id="getAttachId" resultType="String">
+		select max(b.attach_id) 
+		from t_follow a
+		left join t_follow_attach b on b.follow_id =a.id
+		where a.id=#{id}
+	</select>
+</mapper>

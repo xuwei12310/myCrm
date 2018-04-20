@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.BrokerageRuleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.BrokerageRule">
+		<id column="id" property="id" />
+		<result column="rule_owner" property="ruleOwner" />
+		<result column="rule_follow" property="ruleFollow" />
+		<result column="rule_cs_principal" property="ruleCsPrincipal" />
+		<result column="rule_cs_assistant" property="ruleCsAssistant" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- 字典id-->
+		rule_owner ruleOwner, <!-- 拥有人-->
+		rule_follow ruleFollow, <!-- 跟单人-->
+		rule_cs_principal ruleCsPrincipal, <!-- 客服负责人-->
+		rule_cs_assistant ruleCsAssistant, <!-- 客服助理-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+    
+	<select id="findByLIMITOne" resultType="com.xuwei.bean.BrokerageRule">
+        SELECT <include refid="baseColumns" />
+        FROM t_brokerage_rule
+        LIMIT 1
+    </select>
+</mapper>

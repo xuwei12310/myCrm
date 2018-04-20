@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.PlotMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Plot">
+		<id column="id" property="id" />
+		<result column="area_id" property="area.id" />
+		<result column="plot_name" property="plotName" />
+		<result column="status" property="status" />
+		<result column="array" property="array" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		b.id 'area.id', <!-- 区/县Id-->
+		b.area_name 'area.areaName',
+		a.plot_name plotName, <!-- 小区名称-->
+		a.status status, <!-- 状态1启用0禁用-->
+		a.array array, <!-- 排序-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+    
+    <!--  分页查询 -->
+     <select id="findListByPage" resultType="com.xuwei.bean.Plot">
+        select 
+        <include refid="baseColumns"/>
+        from t_plot a
+        left join t_area b  on  a.area_id = b.id
+        where   1 = 1 
+        <if test="m.area != null and m.area.id != null and m.area.id != ''">
+            and b.id = #{m.area.id}
+        </if>
+         <if  test="m.plotName != null and m.plotName != ''">
+            and a.plot_name like concat('%',#{m.plotName},'%')
+        </if>
+        <if test="m.status != null ">
+            and a.status = #{m.status}
+        </if>
+        order by a.array
+    </select>
+     <!-- 查询最大的arry字段 -->
+    <select id="maxArrayIndex" resultType="java.lang.Integer">
+        select max(array) from t_plot
+     </select>
+     <!-- 上移下移 -->
+     <update id="changeArray" >
+        UPDATE t_plot
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_plot where  id=#{destId})
+                        else (select array from t_plot where id=#{srcId})
+                    END array
+            FROM t_plot
+            where id in (#{srcId},#{destId})) a ON t_plot.id=a.id
+        SET t_plot.array=a.array
+  </update>
+  
+  	<!-- 获取所有小区信息 -->
+	<select id="getLivePlotByList" resultType="com.xuwei.bean.Plot">
+		select 
+        <include refid="baseColumns"/>
+        from t_plot a
+        left join t_area b  on  a.area_id = b.id
+        where a.area_id = #{liveAreaid} and a.status=1
+        	<if test="plotName != null">
+        	    and a.plot_name like concat('%',#{plotName},'%')
+        	</if>
+	</select>
+	
+	<select id="getPlot" resultType="com.xuwei.bean.Plot">
+			select 	
+				id id,
+				plot_name plotName
+			from t_plot
+			where status=1 and area_id = #{liveAreaid}
+	</select>
+</mapper>

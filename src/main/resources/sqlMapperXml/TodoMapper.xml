@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.TodoMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Todo">
+		<id column="id" property="id" />
+		<result column="task_type" property="taskType" />
+		<result column="customer_id" property="customerId.id" />
+		<result column="do_time" property="doTime" />
+		<result column="task_content" property="taskContent" />
+		<result column="follow_id" property="followId.id" />
+		<result column="customer_care_id" property="customerCareId.id" />
+		<result column="customer_complain_id" property="customerComplainId.id" />
+		<result column="do_user_id" property="doUserId.id" />
+		<result column="remind" property="remind" />
+		<result column="remind_unit" property="remindUnit" />
+		<result column="status" property="status" />
+		<result column="reason" property="reason" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+	<!-- 通用查询结果列 -->
+	<sql id="baseColumns">
+		id id, <!-- Id -->
+		task_type taskType, <!-- 任务类型(1跟进2日常3投诉4关怀) -->
+		customer_id customerId, <!-- 客户id -->
+		do_time doTime, <!-- 执行时间(年月日时分) -->
+		task_content taskContent, <!-- 任务内容 -->
+		follow_id followId, <!-- 跟进id -->
+		customer_care_id customerCareId, <!-- 客户关怀 -->
+		customer_complain_id customerComplainId, <!-- 客户投诉 -->
+		do_user_id doUserId, <!-- 执行者 -->
+		remind remind, <!-- 提醒时间 -->
+		remind_unit remindUnit, <!-- 提醒单位(1天2小时) -->
+		status status, <!-- 状态(1进行中2已完成3未完成4已取消) -->
+		reason reason, <!-- 未完成说明 -->
+		note note, <!-- 备注 -->
+		creator_id creatorId, <!-- 创建人 -->
+		create_time createTime, <!-- 创建时间 -->
+		last_modify_time lastModifyTime, <!-- 最后修改时间 -->
+		last_modifier_id lastModifierId, <!-- 最后修改人 -->
+	</sql>
+
+	<select id="listTodoByPage" resultType="com.xuwei.bean.Todo">
+		SELECT
+		a.id id,
+		a.task_type taskType,
+		a.customer_id 'customerId.id',
+        (select TIMESTAMPDIFF(DAY,now(),a.do_time)) AS 'date',
+	    (select TIMESTAMPDIFF(HOUR,now(),a.do_time)) as 'hour',
+        (select (select TIMESTAMPDIFF(MINUTE,now(),a.do_time))-(select TIMESTAMPDIFF(HOUR,now(),a.do_time))*60) as 'minute',
+		c.customer_name 'customerId.customerName',
+		a.do_time doTime,
+		a.task_content taskContent,
+		a.follow_id followId,
+		a.customer_care_id 'customerCareId.id',
+        e.care_content 'customerCareId.careContent',
+		a.customer_complain_id 'customerComplainId.id',
+        d.complaint_content  'customerComplainId.complaintContent',
+		a.do_user_id 'doUserId.id',
+		b.username 'doUserId.username',
+		b.name 'doUserId.name',
+		a.remind remind,
+		a.remind_unit remindUnit,
+		a.status status,
+		a.reason reason
+		from t_todo a
+		LEFT JOIN t_user b ON b.id=a.do_user_id
+		LEFT JOIN t_customer c on c.id=a.customer_id
+        LEFT JOIN t_complaint d on d.id=a.customer_complain_id
+        LEFT JOIN t_care e on e.id=a.customer_care_id
+		WHERE 1=1
+		and a.do_user_id=#{m.doUserId.id}
+		<if test="m.taskType != null">
+			and a.task_type = #{m.taskType}
+		</if>
+		<if test="m.status != null">
+			and a.status = #{m.status}
+		</if>
+		<if test="m.doTime != null">
+			and a.do_time like  concat("%",#{m.doTime},"%")
+		</if>
+		ORDER BY a.id DESC
+	</select>
+	<select id="listTodoCreateByPage" resultType="com.xuwei.bean.Todo">
+		SELECT
+		a.id id,
+		a.task_type taskType,
+		a.customer_id 'customerId.id',
+		c.customer_name 'customerId.customerName',
+        (select TIMESTAMPDIFF(DAY,now(),a.do_time)) AS 'date',
+	    (select TIMESTAMPDIFF(HOUR,now(),a.do_time)) as 'hour',
+        (select (select TIMESTAMPDIFF(MINUTE,now(),a.do_time))-(select TIMESTAMPDIFF(HOUR,now(),a.do_time))*60) as 'minute',
+		a.do_time doTime,
+		a.task_content taskContent,
+		a.follow_id followId,
+		a.customer_care_id 'customerCareId.id',
+        e.care_content 'customerCareId.careContent',
+		a.customer_complain_id 'customerComplainId.id',
+        d.complaint_content  'customerComplainId.complaintContent',
+		a.do_user_id 'doUserId.id',
+		b.username 'doUserId.username',
+		b.name 'doUserId.name',
+		a.remind remind,
+		a.remind_unit remindUnit,
+		a.status status,
+		a.reason reason,
+		a.creator_id creatorId,
+		a.note note
+		from t_todo a
+		LEFT JOIN t_user b ON b.id=a.do_user_id
+		LEFT JOIN t_customer c on c.id=a.customer_id
+		LEFT JOIN t_complaint d on d.id=a.customer_complain_id
+        LEFT JOIN t_care e on e.id=a.customer_care_id
+		WHERE 1=1
+		and a.creator_id=#{m.creatorId}
+		<if test="m.taskType != null">
+			and a.task_type = #{m.taskType}
+		</if>
+		<if test="m.status != null">
+			and a.status = #{m.status}
+		</if>
+		ORDER BY a.id DESC
+	</select>
+		<select id="listTodoCopyByPage" resultType="com.xuwei.bean.Todo">
+		SELECT
+		a.id id,
+		a.task_type taskType,
+		a.customer_id 'customerId.id',
+		c.customer_name 'customerId.customerName',
+        (select TIMESTAMPDIFF(DAY,now(),a.do_time)) AS 'date',
+	    (select TIMESTAMPDIFF(HOUR,now(),a.do_time)) as 'hour',
+        (select (select TIMESTAMPDIFF(MINUTE,now(),a.do_time))-(select TIMESTAMPDIFF(HOUR,now(),a.do_time))*60) as 'minute',
+		a.do_time doTime,
+		a.task_content taskContent,
+		a.follow_id followId,
+		a.customer_care_id customerCareId,
+		a.customer_complain_id customerComplainId,
+		a.do_user_id 'doUserId.id',
+		b.username 'doUserId.username',
+		b.name 'doUserId.name',
+		a.remind remind,
+		a.remind_unit remindUnit,
+		a.status status,
+		a.reason reason,
+		a.creator_id creatorId,
+		a.note note
+		from t_todo a
+		LEFT JOIN t_user b ON b.id=a.do_user_id
+		LEFT JOIN t_customer c on c.id=a.customer_id
+		LEFT JOIN t_todo_copyto d on a.id=d.todo_id
+		WHERE 1=1
+	    and d.copyto_user_id=#{userId}
+		<if test="m.taskType != null">
+			and a.task_type = #{m.taskType}
+		</if>
+		<if test="m.status != null">
+			and a.status = #{m.status}
+		</if>
+		ORDER BY a.id DESC
+	</select>
+	<select id="getCustemerByList" resultType="com.xuwei.bean.Customer">
+		select
+		id,
+		customer_name 'customerName'
+		from t_customer
+		where 1=1
+		<if test="customerName != null">
+			and customer_name like  concat("%",#{customerName},"%")
+		</if>
+	</select>
+	<select id="getOwnerByList" resultType="com.xuwei.bean.User">
+		select
+		id,username,name
+		from t_user
+		where 1=1
+		<if test="userName != null">
+			and name like  concat("%",#{userName},"%")
+		</if>
+	</select>
+	<select id="getownInfo" resultType="com.xuwei.bean.User">
+		SELECT
+		a.id,
+		a.username,
+		a.name
+		from t_user a
+		LEFT JOIN t_customer b on a.id=b.owner_id
+		where 1=1
+		<if test="data !=null">
+			and b.id=#{data}
+		</if>
+	</select>
+	<select id="getComplaintByList" resultType="com.xuwei.bean.CustomerComplaint">
+		select
+		t.id,
+		t.customer_id customerId,
+		a.customer_name customerName,
+		t.complaint_content complaintContent,
+		t.complaint_object_id complaintObjectId,
+		t.complaint_time complaintTime,
+		t.handle_time handleTime,
+		t.`status` status
+		from
+		t_complaint t
+		LEFT JOIN t_customer a on a.id=t.customer_id
+		where t.customer_id=#{customerId}
+		<if test="complaintContentId !=null">
+			and t.complaint_content like  concat("%",#{complaintContentId},"%")
+		</if>
+		
+	</select>
+	<select id="getCareByList" resultType="com.xuwei.bean.CustomerCare">
+		select
+		t.id,
+	    t.care_content careContent
+		from
+		t_care t
+		LEFT JOIN t_customer a on a.id=t.customer_id
+		where t.customer_id=#{customerId}
+		<if test="customerCareContentId !=null">
+		and t.care_content like  concat("%",#{customerCareContentId},"%")
+		</if>
+	</select>
+	<select id="getAttachId" resultType="String">
+	      select
+          t.attach_id
+          from t_todo_attach t
+          where t.todo_id=#{todoId}
+	</select>
+	
+	 <select id="findNOTPageAll" resultType="com.xuwei.bean.User">
+        select a.*
+        from t_user a
+        where 1=1
+        <if test="idArray!=null">
+        	and a.id NOT IN
+        	<foreach item="id" collection="idArray" open="(" separator=","
+			close=")">
+				#{id}
+			</foreach>
+        </if>
+        <if test="m.name != null">
+			and name like  concat("%",#{m.name},"%")
+		</if>
+    </select>
+    <select id="findPageAll" resultType="com.xuwei.bean.User">
+        select a.*
+        from t_user a
+        <if test="idArray!=null">
+        	WHERE a.id IN
+        	<foreach item="id" collection="idArray" open="(" separator=","
+			close=")">
+				#{id}
+			</foreach>
+        </if>
+        <if test="idArray==null">
+        	WHERE 1=0
+        </if>
+    </select>
+    
+    <select id="getTodoPageInfo" resultType="com.xuwei.bean.Todo">
+    	select
+    		a.id id,
+			a.task_type taskType,
+			a.customer_id 'customerId.id',
+			c.customer_name 'customerId.customerName',
+			a.do_time doTime,
+			a.task_content taskContent,
+			a.follow_id followId,
+			a.customer_care_id customerCareId,
+			a.customer_complain_id customerComplainId,
+			a.do_user_id 'doUserId.id',
+			b.username 'doUserId.username',
+			b.name 'doUserId.name',
+			b.creator_id 'userCreateTimeId',
+			a.remind remind,
+			a.remind_unit remindUnit,
+			a.status status,
+			a.reason reason,
+			a.note note
+			from t_todo a
+			LEFT JOIN t_user b ON b.id=a.do_user_id
+			LEFT JOIN t_customer c on c.id=a.customer_id
+		where a.id = #{todoId}
+    </select>
+</mapper>

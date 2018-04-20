@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrgBankAccountMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrgBankAccount">
+		<id column="id" property="id" />
+		<result column="org_id" property="orgId" />
+		<result column="account_name" property="accountName" />
+		<result column="bank" property="bank" />
+		<result column="account_number" property="accountNumber" />
+		<result column="array" property="array" />
+		<result column="status" property="status" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- id-->
+		org_id orgId, <!-- 机构-->
+		account_name accountName, <!-- 账户名-->
+		bank bank, <!-- 开户行-->
+		account_number accountNumber, <!-- 账号-->
+		array array, <!-- 排序-->
+		status status, <!-- 状态1启用0禁用-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+    
+    <select id="getBankAccountByList" resultType="com.xuwei.bean.OrgBankAccount">
+    	SELECT 
+    	<!-- <include refid="baseColumns"></include> -->
+    	id id, <!-- id-->
+		org_id orgId, <!-- 机构-->
+		account_name accountName, <!-- 账户名-->
+		bank bank, <!-- 开户行-->
+		account_number accountNumber, <!-- 账号-->
+		array array, <!-- 排序-->
+		status status, <!-- 状态1启用0禁用-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId <!-- 最后修改人-->
+    	FROM
+    	t_org_bank_account 
+    	WHERE 1=1 
+    	<if test="orgId != null">
+    		AND org_id = #{orgId}
+    	</if>
+    </select>
+	<select id="payBankAccountCombobox" resultType="com.xuwei.bean.OrgBankAccount">
+		select id,concat(account_name,"/",account_number) accountName
+		from t_org_bank_account 
+		where status=1
+	</select>
+</mapper>

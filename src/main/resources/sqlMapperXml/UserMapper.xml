@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.UserMapper">
+
+	
+	<sql id="base_Columns">
+		a.id 'id',
+		a.name 'name',
+		a.id_number 'idNumber',
+		a.email 'email',
+		a.username 'username',
+		a.password 'password',
+		a.status 'status',
+		a.is_admin 'isAdmin',
+		a.company_id 'company.id',
+		a.organization_id 'organization.id',
+		a.create_time 'createTime',
+		a.last_modify_time 'lastModifyTime',
+		a.is_lock 'isLock',
+		a.lock_time 'lockTime',
+		a.login_count 'loginCount',
+		a.login_failure_count 'loginFailureCount',
+		a.creator_id 'creatorId',
+		a.phone 'phone',
+		a.last_modifier_id 'lastModifierId',
+		a.pwd_prefix 'pwdPrefix',
+		a.pwd_suffix 'pwdSuffix'
+	</sql>
+	<insert id="insert" parameterType="User">
+        insert into t_user (id, name, username,
+	      password, status,create_time, last_modify_time,
+	      is_lock, lock_time,email,phone,
+	      login_count, login_failure_count, 
+	      creator_id, last_modifier_id,
+	      pwd_prefix,pwd_suffix,company_id,organization_id,is_admin
+	      )
+	    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{username,jdbcType=VARCHAR},
+	      #{password,jdbcType=VARCHAR}, #{status,jdbcType=VARCHAR},
+	      #{createTime,jdbcType=VARCHAR}, #{lastModifyTime,jdbcType=VARCHAR},
+	      #{isLock,jdbcType=VARCHAR}, #{lockTime,jdbcType=TIMESTAMP},
+	      #{email,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},
+	      #{loginCount,jdbcType=INTEGER}, #{loginFailureCount,jdbcType=INTEGER}, 
+	       #{creatorId,jdbcType=BIGINT}, #{lastModifierId,jdbcType=BIGINT},
+	      #{pwdPrefix,jdbcType=VARCHAR},#{pwdSuffix,jdbcType=VARCHAR},#{company.id,jdbcType=BIGINT},#{organization.id,jdbcType=BIGINT},
+	      #{isAdmin}
+	      )
+    </insert>
+	<delete id="deleteById" parameterType="java.lang.Long">
+		delete from t_user
+		where id = #{id}
+	</delete>
+	<delete id="mulDelete" parameterType="java.lang.String">
+		delete from t_user
+		where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<update id="update" parameterType="User">
+		update t_user
+		set name = #{name,jdbcType=VARCHAR},
+		username = #{username,jdbcType=VARCHAR},
+		password = #{password,jdbcType=VARCHAR},
+		status = #{status,jdbcType=VARCHAR},
+		company_id=#{company.id,jdbcType=BIGINT},
+		organization_id=#{organization.id,jdbcType=BIGINT},
+		email=#{email,jdbcType=VARCHAR},
+		phone=#{phone,jdbcType=VARCHAR},
+		last_modify_time = #{lastModifyTime,jdbcType=VARCHAR},
+		is_lock = #{isLock,jdbcType=VARCHAR},
+		lock_time = #{lockTime,jdbcType=TIMESTAMP},
+		login_count = #{loginCount,jdbcType=INTEGER},
+		login_failure_count = #{loginFailureCount,jdbcType=INTEGER},
+		last_modifier_id = #{lastModifierId,jdbcType=BIGINT},
+		pwd_prefix = #{pwdPrefix,jdbcType=VARCHAR},
+		pwd_suffix = #{pwdSuffix,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<!-- 修改密码 -->
+	<update id="updatePWD" parameterType="User">
+		update t_user
+		set password = #{password},
+		last_modify_time = #{lastModifyTime},
+		last_modifier_id = #{lastModifierId}
+		where id = #{id}
+	</update>
+
+	<select id="findById" resultType="com.xuwei.bean.User" parameterType="long">
+		select <include refid="base_Columns"></include> from t_user a
+		where a.id = #{id}
+	</select>
+
+	<select id="getUser" resultType="com.xuwei.bean.User" parameterType="java.lang.String">
+		select <include refid="base_Columns"></include> from t_user a
+		WHERE a.username = #{username}
+	</select>
+
+	<select id="getUserEc" resultType="com.xuwei.bean.User" >
+		select <include refid="base_Columns"></include>  from t_user a
+		WHERE a.username = #{username} and a.id != #{id}
+	</select>
+
+	<sql id="findListWhere">
+		<where>
+			<if test="m.name != null and !&quot;&quot;.equals(m.name.trim())">
+				and a.name like  concat('%',#{m.name},'%')
+			</if>
+			<if test="m.username != null and !&quot;&quot;.equals(m.username.trim())">
+				and a.username like  concat('%',#{m.username},'%')
+			</if>
+		</where>
+		ORDER BY a.id ASC
+	</sql>
+
+	<select id="findListByPage" resultType="User">
+		select <include refid="base_Columns"></include>
+		from t_user a
+		<include refid="findListWhere" />
+	</select>
+
+	<select id="findByUsername" resultType="com.xuwei.bean.User">
+		select <include refid="base_Columns"></include> from t_user a
+		where a.username = #{username}
+	</select>
+
+	<select id="findAuthorities" resultType="java.lang.String">
+		SELECT DISTINCT d.identity
+		FROM t_user_role a
+		LEFT JOIN t_role b ON a.role_id = b.id
+		LEFT JOIN t_role_resources c ON b.id = c.role_id
+		LEFT JOIN t_resources d ON c.resources_id = d.id
+		WHERE a.user_id = #{userId} AND b.status= '启用' AND d.status = '启用'
+	</select>
+
+	<select id="findRoles" resultType="java.lang.String">
+		SELECT b.`name`
+		FROM t_user_role a
+		LEFT JOIN t_role b ON a.role_id = b.id
+		WHERE a.user_id = #{userId} AND b.`status` = '启用';
+	</select>
+
+	<select id="getNotAdminUsers" resultType="com.xuwei.bean.User">
+		SELECT a.id,a.`name`
+		FROM `t_user` a
+		WHERE a.`status` = '启用' AND a.is_admin = '否'
+	</select>
+	    <select id="findListByPageMap" resultType="java.util.HashMap">
+       SELECT a.id 'id',
+      		  a.name 'name',
+      		  a.username 'username',
+      		  a.phone 'phone',
+      		  a.email 'email',
+      		  a.status 'status',
+      		  a.company_id 'company.id',
+      		  e.organization_name 'companyName',
+      		  a.organization_id 'organization.id',
+      		  d.organization_name 'organizations',
+      		  (SELECT GROUP_CONCAT(b.name) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roles',
+              (SELECT GROUP_CONCAT(b.id) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roleIds'
+		FROM t_user a 
+		LEFT JOIN t_organization d on d.id = a.organization_id
+		LEFT JOIN t_organization e on e.id = a.company_id
+		WHERE 1=1
+		<if test="organizationId!=null">
+			and a.organization_id in(
+				SELECT a.id FROM t_organization a
+				WHERE (a.id = #{organizationId} or a.parent_ids like concat(#{parentIds},"%"))
+			)
+		</if>
+		<if test="m==null">
+			and a.is_admin = 0
+		</if>
+		<if test="m!=null and m.isAdmin!=1">
+			and a.is_admin = 0
+		</if>
+		<if test="m!=null and m.status!=null">
+			and a.status=#{m.status}
+		</if>
+		<if test="m!=null and m.name != null and !m.name.trim().equals('')">
+	    	and a.name like  concat('%',#{m.name},'%')
+	    </if>
+	    order by d.parent_ids ASC
+    </select>
+        <select id="findUserList" resultType="java.util.HashMap">
+       SELECT a.id 'id',
+      		  a.name 'name',
+      		  a.username 'username',
+      		  a.phone 'phone',
+      		  a.email 'email',
+      		  a.status 'status',
+      		  a.company_id 'company.id',
+      		  e.organization_name 'companyName',
+      		  a.organization_id 'organization.id',
+      		  d.organization_name 'organizations',
+      		  (SELECT GROUP_CONCAT(b.name) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roles',
+              (SELECT GROUP_CONCAT(b.id) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roleIds'
+		FROM t_user a 
+		LEFT JOIN t_organization d on d.id = a.organization_id
+		LEFT JOIN t_organization e on e.id = a.company_id
+		WHERE 1=1
+		<if test="m==null">
+			and a.is_admin = 0
+		</if>
+		<if test="m!=null and m.isAdmin!=1">
+			and a.is_admin = 0
+		</if>
+		<if test="m!=null and m.status!=null">
+			and a.status=#{m.status}
+		</if>
+		<if test="m!=null and m.name != null and !&quot;&quot;.equals(m.name.trim())">
+	    	and a.name like  concat('%',#{m.name},'%')
+	    </if>
+	    	and a.is_admin=0
+	    order by d.parent_ids ASC
+    </select>
+	<update id="updateStatus">
+		update t_user 
+		set status=#{status}
+		where id=#{id}
+	</update>
+	<delete id="deleteByIdArray">
+		delete from t_user 
+		where id in
+		<foreach collection="idArray" item="id" open="(" close=")" separator=",">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<!-- 获取转交用户列表（出去当前拥有人）  -->
+	<select id="getTransferUserByList" resultType="com.xuwei.bean.User">
+		select 
+			id,username,name
+		from t_user
+		where id <![CDATA[ <> ]]> #{transferUserId} and status=1
+			<if test="userName != null">
+				and name like concat('%',#{userName},'%')
+			</if>
+	</select>
+    <select id="getManagerByUserId" resultType="com.xuwei.bean.User">
+		SELECT <include refid="base_Columns"/>
+		from t_user a
+		LEFT JOIN t_user_role c ON c.user_id= a.id
+		LEFT JOIN t_role d ON d.id = c.role_id
+		WHERE a.organization_id=(SELECT organization_id from t_user WHERE id= #{userId})  and d.`name`='经理'
+	</select>
+	
+	<select id="getAllUser" resultType="com.xuwei.bean.User">
+		select 
+			id,username,name
+		from t_user
+		where status=1
+	</select>
+	<!-- 获取我的信息（微信端） -->
+	<select id="getMyInfo" resultType="com.xuwei.bean.User">
+		SELECT a.id 'id',
+      		  a.name 'name',
+      		  a.username 'username',
+      		  a.phone 'phone',
+      		  a.email 'email',
+      		  a.status 'status',
+      		  a.company_id 'company.id',
+      		  e.organization_name 'companyName',
+      		  a.organization_id 'organization.id',
+      		  d.organization_name 'organization.organizationName',
+      		  (SELECT GROUP_CONCAT(b.name) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roles',
+              (SELECT GROUP_CONCAT(b.id) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roleIds'
+		FROM t_user a 
+		LEFT JOIN t_organization d on d.id = a.organization_id
+		LEFT JOIN t_organization e on e.id = a.company_id
+		WHERE a.id = #{userId}
+	</select>
+    <select id="getCompanyManager" resultType="com.xuwei.bean.User">
+		SELECT <include refid="base_Columns"/>
+		FROM t_user a
+		LEFT JOIN t_user_role b ON b.user_id=a.id
+		LEFT JOIN t_role      c ON c.id=b.role_id
+		WHERE
+		c.role ='总经理'
+	</select>
+	 <select id="getFinance" resultType="com.xuwei.bean.User">
+		SELECT <include refid="base_Columns"/>
+		FROM t_user a
+		LEFT JOIN t_user_role b ON b.user_id=a.id
+		LEFT JOIN t_role      c ON c.id=b.role_id
+		WHERE
+		c.role ='财务'
+	</select>
+	
+	<select id="getIdentityInfo" resultType="java.lang.String">
+		SELECT DISTINCT d.identity
+		FROM t_user_role a
+		LEFT JOIN t_role b ON a.role_id = b.id
+		LEFT JOIN t_role_resources c ON b.id = c.role_id
+		LEFT JOIN t_resources d ON c.resources_id = d.id
+		WHERE a.user_id = #{userId} AND b.status= '启用' AND d.status = '启用' and d.identity = #{identity}
+	</select>
+	<select id="getUserInfo" resultType="com.xuwei.bean.User">
+		SELECT
+			a.id 'id',
+			a. NAME 'name',
+			a.username 'username',
+			a.phone 'phone',
+			a.email 'email',
+			a. STATUS 'status',
+			a.company_id 'company.id',
+			e.organization_name 'companyName',
+			a.organization_id 'organization.id',
+			d.organization_name 'organization.organizationName',
+			(
+				SELECT
+					GROUP_CONCAT(b. NAME)
+				FROM
+					t_role b
+				LEFT JOIN t_user_role c ON c.role_id = b.id
+				WHERE
+					c.user_id = a.id
+			) 'roles',
+			(
+				SELECT
+					GROUP_CONCAT(b.id)
+				FROM
+					t_role b
+				LEFT JOIN t_user_role c ON c.role_id = b.id
+				WHERE
+					c.user_id = a.id
+			) 'roleIds'
+		FROM
+			t_user a
+		LEFT JOIN t_organization d ON d.id = a.organization_id
+		LEFT JOIN t_organization e ON e.id = a.company_id
+		WHERE
+			a.id = #{userId}
+	</select>
+</mapper>

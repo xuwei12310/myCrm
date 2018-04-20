@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CustomerMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Customer">
+		<id column="id" property="id" />
+		<result column="customer_type" property="customerType" />
+		<result column="customer_name" property="customerName" />
+		<result column="sex" property="sex" />
+		<result column="mobile_phone" property="mobilePhone" />
+		<result column="telephone" property="telephone" />
+		<result column="email" property="email" />
+		<result column="id_number" property="idNumber" />
+		<result column="id_address" property="idAddress" />
+		<result column="customer_source_id" property="customerSource.id" />
+		<result column="customer_stage_id" property="customerStage.id" />
+		<result column="customer_status_id" property="customerStatus.id" />
+		<result column="owner_id" property="owner.id" />
+		<result column="grade_id" property="gradeId" />
+		<result column="place_id" property="place.id" />
+		<result column="marital_id" property="maritalId" />
+		<result column="live_area_id" property="liveArea.id" />
+		<result column="live_plot_id" property="livePlot.id" />
+		<result column="birthdate" property="birthdate" />
+		<result column="company" property="company" />
+		<result column="occupation" property="occupation" />
+		<result column="spouse_name" property="spouseName" />
+		<result column="spouse_place_id" property="spousePlace.id" />
+		<result column="spouse_mobile_phone" property="spouseMobilePhone" />
+		<result column="spouse_id_number" property="spouseIdNumber" />
+		<result column="spouse_company" property="spouseCompany" />
+		<result column="spouse_occupation" property="spouseOccupation" />
+		<result column="credit_rating_id" property="creditRatingId" />
+		<result column="credit_rating_attach_id" property="creditRatingAttachId" />
+		<result column="last_track_time" property="lastTrackTime" />
+		<result column="photo_id" property="photoId" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		customer_type customerType, <!-- 客户类型1个人2企业-->
+		customer_name customerName, <!-- 客户名称-->
+		sex sex, <!-- 性别1男2女-->
+		mobile_phone mobilePhone, <!-- 手机号-->
+		telephone telephone, <!-- 固定电话-->
+		email email, <!-- 邮箱-->
+		id_number idNumber, <!-- 身份证号-->
+		id_address idAddress, <!-- 身份证地址-->
+		customer_source_id customerSourceId, <!-- 客户来源-->
+		customer_stage_id customerStageId, <!-- 客户阶段-->
+		customer_status_id customerStatusId, <!-- 客户状态-->
+		owner_id ownerId, <!-- 拥有人-->
+		grade_id gradeId, <!-- 智能评级-->
+		place_id placeId, <!-- 户籍地-->
+		marital_id maritalId, <!-- 婚姻状况-->
+		live_area_id liveAreaId, <!-- 居住地区-->
+		live_plot_id livePlotId, <!-- 居住小区-->
+		birthdate birthdate, <!-- 出生日期-->
+		company company, <!-- 就职单位-->
+		occupation occupation, <!-- 职业-->
+		spouse_name spouseName, <!-- 配偶姓名-->
+		spouse_place_id spousePlaceId, <!-- 配偶户籍地-->
+		spouse_mobile_phone spouseMobilePhone, <!-- 配偶手机号-->
+		spouse_id_number spouseIdNumber, <!-- 配偶身份证号-->
+		spouse_company spouseCompany, <!-- 配偶就职单位-->
+		spouse_occupation spouseOccupation, <!-- 配偶职业-->
+		credit_rating_id creditRatingId, <!-- 信用等级-->
+		credit_rating_attach_id creditRatingAttachId, <!-- 信用等级附件-->
+		last_track_time lastTrackTime, <!-- 最后跟进时间(年月日）-->
+		photo_id photoId, <!-- 照片-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+	<!-- 根据手机号获取客户数量-->
+	<select id="mobilePhoneNum" resultType="int">
+		select count(*) 
+		from t_customer
+		where mobile_phone = #{mobilePhone}
+			<if test="customerid != null">
+				and id <![CDATA[ <> ]]> #{customerid}
+			</if>
+	</select>
+	<!-- 根据身份证号获取客户数量-->
+	<select id="idNumberNum" resultType="int">
+		select count(*) 
+		from t_customer
+		where id_number = #{idNumber}
+			<if test="customerid != null">
+				and id <![CDATA[ <> ]]> #{customerid}
+			</if>
+	</select>
+	
+	<!-- 通用查询结果列 -->
+    <sql id="cuBaseColumns">
+		a.id id, <!-- Id-->
+		a.customer_type customerType, <!-- 客户类型1个人2企业-->
+		a.customer_name customerName, <!-- 客户名称-->
+		a.sex sex, <!-- 性别1男2女-->
+		a.mobile_phone mobilePhone, <!-- 手机号-->
+		a.telephone telephone, <!-- 固定电话-->
+		a.email email, <!-- 邮箱-->
+		a.id_number idNumber, <!-- 身份证号-->
+		a.id_address idAddress, <!-- 身份证地址-->
+		a.customer_source_id 'customerSource.id', <!-- 客户来源-->
+		b.name 'customerSource.name',
+		a.customer_stage_id 'customerStage.id', <!-- 客户阶段-->
+		c.name 'customerStage.name',
+		a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+		d.name 'customerStatus.name',
+		a.owner_id 'owner.id', <!-- 拥有人-->
+		h.username 'owner.username',
+		h.name 'owner.name',
+		a.grade_id gradeId, <!-- 智能评级-->
+		a.place_id 'place.id', <!-- 户籍地-->
+		e.area_name 'place.areaName',
+		e.show_name 'place.showName',
+		a.marital_id maritalId, <!-- 婚姻状况-->
+		a.live_area_id 'liveArea.id', <!-- 居住地区-->
+		f.area_name 'liveArea.areaName',
+		f.show_name 'liveArea.showName',
+		a.live_plot_id 'livePlot.id', <!-- 居住小区-->
+		i.plot_name 'livePlot.plotName',
+		a.birthdate birthdate, <!-- 出生日期-->
+		a.company company, <!-- 就职单位-->
+		a.occupation occupation, <!-- 职业-->
+		a.spouse_name spouseName, <!-- 配偶姓名-->
+		a.spouse_place_id 'spousePlace.id', <!-- 配偶户籍地-->
+		g.area_name 'spousePlace.areaName',
+		g.show_name 'spousePlace.showName',
+		a.spouse_mobile_phone spouseMobilePhone, <!-- 配偶手机号-->
+		a.spouse_id_number spouseIdNumber, <!-- 配偶身份证号-->
+		a.spouse_company spouseCompany, <!-- 配偶就职单位-->
+		a.spouse_occupation spouseOccupation, <!-- 配偶职业-->
+		a.credit_rating_id creditRatingId, <!-- 信用等级-->
+		a.credit_rating_attach_id creditRatingAttachId, <!-- 信用等级附件-->
+		a.last_track_time lastTrackTime, <!-- 最后跟进时间(年月日）-->
+		a.photo_id photoId, <!-- 照片-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId  <!-- 最后修改人-->
+    </sql>
+    
+    <select id="listCustomerByPage" resultType="com.xuwei.bean.Customer">
+    	SELECT 
+    		<include refid="cuBaseColumns" />
+    	FROM t_customer a
+    	LEFT JOIN t_dict b ON b.id = a.customer_source_id
+    	LEFT JOIN t_dict c ON c.id = a.customer_stage_id
+    	LEFT JOIN t_dict d ON d.id = a.customer_status_id
+    	LEFT JOIN t_area e ON e.id = a.place_id
+    	LEFT JOIN t_area f ON f.id = a.live_area_id
+    	LEFT JOIN t_area g ON g.id = a.spouse_place_id
+    	LEFT JOIN t_user h ON h.id = a.owner_id
+    	LEFT JOIN t_plot i ON i.id = a.live_plot_id
+    	WHERE 1=1
+    		<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="m.customerType != null">
+    			and a.customer_type = #{m.customerType}
+    		</if>
+    		<if test="m.customerName != null">
+    			and a.customer_name like concat('%',#{m.customerName},'%')
+    		</if>
+    		<if test="m.customerStatus != null and m.customerStatus.id !='' and m.customerStatus.id != null">
+    			and a.customer_status_id = #{m.customerStatus.id}
+    		</if>
+    		<if test="m.livePlot != null and m.livePlot.plotName !='' and m.livePlot.plotName != null">
+    			and i.plot_name like concat('%',#{m.livePlot.plotName},'%')
+    		</if>
+    		<if test="m.mobilePhone != null">
+    			and a.mobile_phone like concat('%',#{m.mobilePhone},'%')
+    		</if>
+    		<if test="m.idNumber != null">
+    			and a.id_number like concat('%',#{m.idNumber},'%')
+    		</if>
+    		<if test="todayTime != null">
+    			and a.last_modify_time <![CDATA[ >= ]]> #{todayTime} 
+    		</if>
+    		<if test="m.createTimeMin != null and m.createTimeMax == null">
+    			and a.create_time <![CDATA[ >= ]]> #{m.createTimeMin} 
+    		</if>
+    		<if test="m.createTimeMin == null and m.createTimeMax != null">
+    			and a.create_time <![CDATA[ < ]]> #{m.createTimeMax} 
+    		</if>
+    		<if test="m.createTimeMin != null and m.createTimeMax != null">
+    			and a.create_time <![CDATA[ < ]]> #{m.createTimeMax} and a.create_time <![CDATA[ >= ]]> #{m.createTimeMin} 
+    		</if>
+    		<if test="m.lastTrackTimeMin != null and m.lastTrackTimeMax == null">
+    			and a.last_track_time <![CDATA[ >= ]]> #{m.lastTrackTimeMin} 
+    		</if>
+    		<if test="m.lastTrackTimeMin == null and m.lastTrackTimeMax != null">
+    			and a.last_track_time <![CDATA[ < ]]> #{m.lastTrackTimeMax} 
+    		</if>
+    		<if test="m.lastTrackTimeMin != null and m.lastTrackTimeMax != null">
+    			and a.last_track_time <![CDATA[ < ]]> #{m.lastTrackTimeMax} and a.last_track_time <![CDATA[ >= ]]> #{m.lastTrackTimeMin} 
+    		</if>
+    		<if test="m.customSql != null">
+    			and  ${m.customSql}
+    		</if>
+    	ORDER BY a.id DESC	
+    </select>
+    <select id="selectCustomerById" resultType="com.xuwei.bean.Customer">
+    	SELECT 
+    		a.id id, <!-- Id-->
+			a.customer_type customerType, <!-- 客户类型1个人2企业-->
+			a.customer_name customerName, <!-- 客户名称-->
+			a.sex sex, <!-- 性别1男2女-->
+			a.mobile_phone mobilePhone, <!-- 手机号-->
+			a.telephone telephone, <!-- 固定电话-->
+			a.email email, <!-- 邮箱-->
+			a.id_number idNumber, <!-- 身份证号-->
+			a.id_address idAddress, <!-- 身份证地址-->
+			a.customer_source_id 'customerSource.id', <!-- 客户来源-->
+			b.name 'customerSource.name',
+			a.customer_stage_id 'customerStage.id', <!-- 客户阶段-->
+			c.name 'customerStage.name',
+			a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+			d.name 'customerStatus.name',
+			a.owner_id 'owner.id', <!-- 拥有人-->
+			h.username 'owner.username',
+			h.name 'owner.name',
+			a.grade_id gradeId, <!-- 智能评级-->
+			a.place_id 'place.id', <!-- 户籍地-->
+			e.area_name 'place.areaName',
+			e.show_name 'place.showName',
+			e.province_id 'place.province.id',
+			e.city_id 'place.city.id',
+			a.marital_id maritalId, <!-- 婚姻状况-->
+			a.live_area_id 'liveArea.id', <!-- 居住地区-->
+			f.area_name 'liveArea.areaName',
+			f.show_name 'liveArea.showName',
+			f.province_id 'liveArea.province.id',
+			f.city_id 'liveArea.city.id',
+			a.live_plot_id 'livePlot.id', <!-- 居住小区-->
+			i.plot_name 'livePlot.plotName',
+			a.birthdate birthdate, <!-- 出生日期-->
+			a.company company, <!-- 就职单位-->
+			a.occupation occupation, <!-- 职业-->
+			a.spouse_name spouseName, <!-- 配偶姓名-->
+			a.spouse_place_id 'spousePlace.id', <!-- 配偶户籍地-->
+			g.area_name 'spousePlace.areaName',
+			g.show_name 'spousePlace.showName',
+			g.province_id 'spousePlace.province.id',
+			g.city_id 'spousePlace.city.id',
+			a.spouse_mobile_phone spouseMobilePhone, <!-- 配偶手机号-->
+			a.spouse_id_number spouseIdNumber, <!-- 配偶身份证号-->
+			a.spouse_company spouseCompany, <!-- 配偶就职单位-->
+			a.spouse_occupation spouseOccupation, <!-- 配偶职业-->
+			a.credit_rating_id creditRatingId, <!-- 信用等级-->
+			a.credit_rating_attach_id creditRatingAttachId, <!-- 信用等级附件-->
+			a.last_track_time lastTrackTime, <!-- 最后跟进时间(年月日）-->
+			a.photo_id photoId, <!-- 照片-->
+			a.note note, <!-- 备注-->
+			a.creator_id creatorId, <!-- 创建人-->
+			a.create_time createTime, <!-- 创建时间-->
+			a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+			a.last_modifier_id lastModifierId  <!-- 最后修改人-->
+    	FROM t_customer a
+    	LEFT JOIN t_dict b ON b.id = a.customer_source_id
+    	LEFT JOIN t_dict c ON c.id = a.customer_stage_id
+    	LEFT JOIN t_dict d ON d.id = a.customer_status_id
+    	LEFT JOIN t_area e ON e.id = a.place_id
+    	LEFT JOIN t_area f ON f.id = a.live_area_id
+    	LEFT JOIN t_area g ON g.id = a.spouse_place_id
+    	LEFT JOIN t_user h ON h.id = a.owner_id
+    	LEFT JOIN t_plot i ON i.id = a.live_plot_id
+    	WHERE a.id = #{customerid}
+    </select>
+    <!-- 获取所有用户信息 -->
+	<select id="getOwnerByList" resultType="com.xuwei.bean.User">
+		select 
+			id,username,name
+		from t_user
+		where 1=1 and status=1
+			<if test="userName != null">
+				and name like concat('%',#{userName},'%')
+			</if>
+	</select>
+	
+	<select id="findBySearch" resultType="java.util.HashMap">
+		select 
+			a.id id, <!-- Id-->
+			a.customer_type customerType, <!-- 客户类型1个人2企业-->
+			a.customer_name customerName, <!-- 客户名称-->
+			a.sex sex, <!-- 性别1男2女-->
+			a.mobile_phone mobilePhone, <!-- 手机号-->
+			a.telephone telephone, <!-- 固定电话-->
+			a.email email, <!-- 邮箱-->
+			a.id_number idNumber, <!-- 身份证号-->
+			a.id_address idAddress, <!-- 身份证地址-->
+			a.customer_source_id 'customerSource.id', <!-- 客户来源-->
+		    b.name 'customerSourceName',
+			a.customer_stage_id 'customerStage.id', <!-- 客户阶段-->
+			c.name 'customerStageName',
+			a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+			d.name 'customerStatusName',
+			a.owner_id 'owner.id', <!-- 拥有人-->
+			h.username 'owner.username',
+			h.name 'ownerName',
+			a.grade_id gradeId, <!-- 智能评级-->
+			a.place_id 'place.id', <!-- 户籍地-->
+			e.area_name 'place.areaName',
+			e.show_name 'placeShowName',
+			a.marital_id maritalId, <!-- 婚姻状况-->
+			a.live_area_id 'liveArea.id', <!-- 居住地区-->
+			f.area_name 'liveArea.areaName',
+			f.show_name 'liveAreaShowName',
+			a.live_plot_id 'livePlot.id', <!-- 居住小区-->
+			i.plot_name 'livePlotPlotName',
+			a.birthdate birthdate, <!-- 出生日期-->
+			a.company company, <!-- 就职单位-->
+			a.occupation occupation, <!-- 职业-->
+			a.spouse_name spouseName, <!-- 配偶姓名-->
+			a.spouse_place_id 'spousePlace.id', <!-- 配偶户籍地-->
+			g.area_name 'spousePlace.areaName',
+			g.show_name 'spousePlaceShowName',
+			a.spouse_mobile_phone spouseMobilePhone, <!-- 配偶手机号-->
+			a.spouse_id_number spouseIdNumber, <!-- 配偶身份证号-->
+			a.spouse_company spouseCompany, <!-- 配偶就职单位-->
+			a.spouse_occupation spouseOccupation, <!-- 配偶职业-->
+			a.credit_rating_id creditRatingId, <!-- 信用等级-->
+			a.credit_rating_attach_id creditRatingAttachId, <!-- 信用等级附件-->
+			a.last_track_time lastTrackTime, <!-- 最后跟进时间(年月日）-->
+			a.photo_id photoId, <!-- 照片-->
+			a.note note, <!-- 备注-->
+			a.creator_id creatorId, <!-- 创建人-->
+			a.create_time createTime, <!-- 创建时间-->
+			a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+			a.last_modifier_id lastModifierId  <!-- 最后修改人-->
+		FROM t_customer a
+		LEFT JOIN t_dict b ON b.id = a.customer_source_id
+    	LEFT JOIN t_dict c ON c.id = a.customer_stage_id
+    	LEFT JOIN t_dict d ON d.id = a.customer_status_id
+    	LEFT JOIN t_area e ON e.id = a.place_id
+    	LEFT JOIN t_area f ON f.id = a.live_area_id
+    	LEFT JOIN t_area g ON g.id = a.spouse_place_id
+    	LEFT JOIN t_user h ON h.id = a.owner_id
+    	LEFT JOIN t_plot i ON i.id = a.live_plot_id
+    	where 1=1
+			<if test="m.customerType != null">
+    			and a.customer_type = #{m.customerType}
+    		</if>
+    		<if test="m.customerName != null">
+    			and a.customer_name like concat('%',#{m.customerName},'%')
+    		</if>
+    		<if test="m.customerStatus != null and m.customerStatus.id !='' and m.customerStatus.id != null">
+    			and a.customer_status_id = #{m.customerStatus.id}
+    		</if>
+    		<if test="m.livePlot != null and m.livePlot.plotName !='' and m.livePlot.plotName != null">
+    			and i.plot_name like concat('%',#{m.livePlot.plotName},'%')
+    		</if>
+    		<if test="m.mobilePhone != null">
+    			and a.mobile_phone like concat('%',#{m.mobilePhone},'%')
+    		</if>
+    		<if test="m.idNumber != null">
+    			and a.id_number like concat('%',#{m.idNumber},'%')
+    		</if>
+    	ORDER BY a.id DESC
+	</select>
+	<!-- 统计 -->
+	<!-- 全部客户 -->
+	<select id="wholeCustomerNum" resultType="int">
+		select count(*) from t_customer a
+		where 1=1
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+	</select>
+	<!-- 个人客户 -->
+	<select id="personalCustomerNum" resultType="int">
+		select count(*) from t_customer a where a.customer_type=1
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+	</select>
+	<!-- 企业客户 -->
+	<select id="enterpriseCustomerNum" resultType="int">
+		select count(*) from t_customer a where a.customer_type=2
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+	</select>
+	<!-- 今日更新 -->
+	<select id="todayUpdateNum" resultType="int">
+		select count(*) from t_customer a where a.last_modify_time <![CDATA[ >= ]]> #{todayTime} 
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+	</select>
+	
+	<select id="findByIdNumber" resultType="com.xuwei.bean.Customer">
+		select 
+			<include refid="cuBaseColumns" />
+    	FROM t_customer a
+    	LEFT JOIN t_dict b ON b.id = a.customer_source_id
+    	LEFT JOIN t_dict c ON c.id = a.customer_stage_id
+    	LEFT JOIN t_dict d ON d.id = a.customer_status_id
+    	LEFT JOIN t_area e ON e.id = a.place_id
+    	LEFT JOIN t_area f ON f.id = a.live_area_id
+    	LEFT JOIN t_area g ON g.id = a.spouse_place_id
+    	LEFT JOIN t_user h ON h.id = a.owner_id
+    	LEFT JOIN t_plot i ON i.id = a.live_plot_id
+    	WHERE a.id_number = #{idNumber}
+	</select>
+	<!-- 全部客户  -->
+	<select id="getCustomerList" resultType="com.xuwei.bean.Customer">
+		SELECT 
+			a.id id,
+			a.customer_name customerName,
+			a.owner_id 'owner.id',      <!-- 拥有人-->
+			b.username 'owner.username',
+			a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+			c.name 'customerStatusName'
+		from t_customer a
+		LEFT JOIN t_user b ON b.id = a.owner_id
+		LEFT JOIN t_dict c ON c.id = a.customer_status_id
+		where 1=1 
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+			<if test="searchValue != null">
+				and a.customer_name like concat('%',#{searchValue},'%')
+			</if>
+		ORDER BY a.id DESC
+	</select>
+	<!-- 今日更新 -->
+	<select id="getCustomerTodayUpdateList" resultType="com.xuwei.bean.Customer">
+		SELECT 
+			a.id id,
+			a.customer_name customerName,
+			a.owner_id 'owner.id',      <!-- 拥有人-->
+			b.username 'owner.username',
+			a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+			c.name 'customerStatusName'
+		from t_customer a
+		LEFT JOIN t_user b ON b.id = a.owner_id
+		LEFT JOIN t_dict c ON c.id = a.customer_status_id
+		where 1=1 and a.last_modify_time <![CDATA[ >= ]]> #{currentTime} 
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+			<if test="searchValue != null">
+				and a.customer_name like concat('%',#{searchValue},'%')
+			</if>
+		ORDER BY a.id DESC
+	</select>
+	
+	<!-- 近一周 -->
+	<select id="getCustomerNearlyAWeekList" resultType="com.xuwei.bean.Customer">
+		SELECT 
+			a.id id,
+			a.customer_name customerName,
+			a.owner_id 'owner.id',      <!-- 拥有人-->
+			b.username 'owner.username',
+			a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+			c.name 'customerStatusName'
+		from t_customer a
+		LEFT JOIN t_user b ON b.id = a.owner_id
+		LEFT JOIN t_dict c ON c.id = a.customer_status_id
+		where 1=1 and date_sub(#{currentTime}, INTERVAL 7 DAY) <![CDATA[ <= ]]> date(a.last_modify_time)
+			<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+			<if test="searchValue != null">
+				and a.customer_name like concat('%',#{searchValue},'%'}
+			</if>
+		ORDER BY a.id DESC
+	</select>
+	
+	<!-- 近一个月 -->
+	<select id="getCustomerNearlyAMonthList" resultType="com.xuwei.bean.Customer">
+		SELECT 
+			a.id id,
+			a.customer_name customerName,
+			a.owner_id 'owner.id',      <!-- 拥有人-->
+			b.username 'owner.username',
+			a.customer_status_id 'customerStatus.id', <!-- 客户状态-->
+			c.name 'customerStatusName'
+		from t_customer a
+		LEFT JOIN t_user b ON b.id = a.owner_id
+		LEFT JOIN t_dict c ON c.id = a.customer_status_id
+		where 1=1 and date_sub(#{currentTime}, INTERVAL 30 DAY) <![CDATA[ <= ]]> date(a.last_modify_time)
+		<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.owner_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.owner_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.owner_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+			<if test="searchValue != null">
+				and a.customer_name like concat('%',#{searchValue},'%')
+			</if>
+		ORDER BY a.id DESC
+	</select>
+	<select id="listCustomerByOrder" resultType="com.xuwei.bean.Customer">
+		SELECT 
+    		<include refid="cuBaseColumns" />
+    	FROM t_customer a
+    	LEFT JOIN t_dict b ON b.id = a.customer_source_id
+    	LEFT JOIN t_dict c ON c.id = a.customer_stage_id
+    	LEFT JOIN t_dict d ON d.id = a.customer_status_id
+    	LEFT JOIN t_area e ON e.id = a.place_id
+    	LEFT JOIN t_area f ON f.id = a.live_area_id
+    	LEFT JOIN t_area g ON g.id = a.spouse_place_id
+    	LEFT JOIN t_user h ON h.id = a.owner_id
+    	LEFT JOIN t_plot i ON i.id = a.live_plot_id
+    	LEFT JOIN t_order j ON j.customer_id =a.id
+    	where j.id=#{id}
+	</select>
+	<!-- 获取全部客户 -->
+	<select id="getAllCustomerByList" resultType="com.xuwei.bean.Customer">
+		select
+			id id,
+			customer_name customerName
+		FROM t_customer
+		ORDER BY id DESC
+	</select>
+</mapper>

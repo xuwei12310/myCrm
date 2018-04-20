@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CoreUserMapper">
+
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.CoreUser">
+		<id column="USERID" property="userid" />
+		<result column="USERNAME" property="username" />
+		<result column="USERPWD" property="userpwd" />
+		<result column="NICKNAME" property="nickname" />
+		<result column="TELNO" property="telno" />
+		<result column="ISADMIN" property="isadmin" />
+		<result column="ORGANIZATIONID" property="ORGANIZATION.id" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        USERID AS userid, USERNAME AS username, USERPWD AS userpwd, NICKNAME AS nickname, TELNO AS telno, ISADMIN AS isadmin
+    </sql>
+	
+	   <select id="findListByPageMap" resultType="java.util.HashMap">
+     	  SELECT a.userid "userid",
+      		  a.nickname "nickname",
+      		  a.username "username",
+      		  a.telno "telno",
+      		  a.isAdmin "isadmin",
+      		  a.organizationId "organization.id",
+      		  d.organizationName "organizationName"
+      		 <!--  (SELECT GROUP_CONCAT(b.name) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roles',
+              (SELECT GROUP_CONCAT(b.id) FROM t_role b 
+              LEFT JOIN t_user_role c on c.role_id = b.id
+              WHERE c.user_id = a.id) 'roleIds' -->
+		FROM COREUSER a 
+		LEFT JOIN ORGANIZATION d on d.id = a.organizationId
+		WHERE 1=1
+		<if test="organizationId!=null and organizationId!=1">
+			and a.organizationId in(
+				SELECT a.id FROM ORGANIZATION a
+				WHERE (a.id = #{organizationId} or a.parentids like concat(#{parentIds},'%'))
+			)
+		</if>
+		<if test="m!=null and m.username!=null">
+			and a.username like concat(concat('%',#{m.username}),'%')
+		</if>
+	<!-- 	<if test="m==null">
+			and a.is_admin = 0
+		</if>
+		<if test="m!=null and m.isAdmin!=1">
+			and a.is_admin = 0
+		</if>
+		<if test="m!=null and m.status!=null">
+			and a.status=#{m.status}
+		</if>
+		<if test="m!=null and m.name != null and !m.name.trim().equals('')">
+	    	and a.name like  concat('%',#{m.name},'%')
+	    </if> -->
+	    order by d.parentids ASC
+    </select>
+    <delete id="delete" >
+    	delete from coreuser 
+    	<where>
+    		userid in 
+    		<foreach collection="ids" item="id" separator="," open="(" close=")">
+    			#{id}
+    		</foreach>
+    	</where>
+    </delete>
+    <update id="resetPwd">
+    	update coreuser 
+    	set userpwd ='a123456'
+    	<where>
+    		userid in 
+    		<foreach collection="ids" item="id" separator="," open="(" close=")">
+    			#{id}
+    		</foreach>
+    	</where>
+    </update>
+</mapper>

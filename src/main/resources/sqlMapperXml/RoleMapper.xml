@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.RoleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Role">
+		<id column="id" property="id" />
+		<result column="name" property="name" />
+		<result column="role" property="role" />
+		<result column="description" property="description" />
+		<result column="status" property="status" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="note" property="note" />
+		<result column="is_sys" property="isSys" />
+		<result column="creator_id" property="creatorId" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	<delete id="mulDelete" parameterType="java.lang.String">
+		delete from t_role
+		where id in
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<select id="findAll" resultType="Role">
+		select a.* from t_role a WHERE a.id!=1
+	</select>
+</mapper>

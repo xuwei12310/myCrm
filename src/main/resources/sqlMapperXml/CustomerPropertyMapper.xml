@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CustomerPropertyMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.CustomerProperty">
+		<id column="id" property="id" />
+		<result column="customer_id" property="customerId" />
+		<result column="certificate" property="certificate" />
+		<result column="owner" property="owner" />
+		<result column="is_common" property="isCommon" />
+		<result column="area" property="area" />
+		<result column="housing_nature_id" property="housingNature.id" />
+		<result column="area_id" property="areaId.id" />
+		<result column="plot_id" property="plotId.id" />
+		<result column="house_address" property="houseAddress" />
+		<result column="hava_land_certificate" property="havaLandCertificate" />
+		<result column="land_certificate_number" property="landCertificateNumber" />
+		<result column="land_nature_id" property="landNature.id" />
+		<result column="property_value" property="propertyValue" />
+		<result column="attach_id" property="attachId" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		customer_id customerId, <!-- 客户-->
+		certificate certificate, <!-- 产权证号-->
+		owner owner, <!-- 所有人-->
+		is_common isCommon, <!-- 是否共同情况1是0否-->
+		area area, <!-- 面积-->
+		housing_nature_id housingNatureId, <!-- 房屋性质-->
+		area_id areaId, <!-- 所在地区-->
+		plot_id plotId, <!-- 小区-->
+		house_address houseAddress, <!-- 房屋地址-->
+		hava_land_certificate havaLandCertificate, <!-- 有无土地证(1有 0 无)-->
+		land_certificate_number landCertificateNumber, <!-- 土地证号-->
+		land_nature_id landNatureId, <!-- 土地性质-->
+		property_value propertyValue, <!-- 房产价值-->
+		attach_id attachId, <!-- 附件-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+    
+	<!-- 通用查询结果列 -->
+    <sql id="propertyBaseColumns">
+		a.id id, <!-- Id-->
+		a.customer_id customerId, <!-- 客户-->
+		a.certificate certificate, <!-- 产权证号-->
+		a.owner owner, <!-- 所有人-->
+		a.is_common isCommon, <!-- 是否共同情况1是0否-->
+		case when a.is_common = 0 then '否'
+		         else '是' end 'isCommonName',
+		a.area area, <!-- 面积-->
+		a.housing_nature_id 'housingNature.id', <!-- 房屋性质-->
+		d.name 'housingNature.name', <!-- 房屋性质-->
+		a.area_id 'areaId.id', <!-- 所在地区-->
+		b.area_name 'areaId.areaName', <!-- 所在地区名称-->
+		b.show_name 'areaId.showName', <!-- 所在地区显示名称-->
+		a.plot_id 'plotId.id', <!-- 小区-->
+		c.plot_name 'plotId.plotName', <!-- 小区名称-->
+		a.house_address houseAddress, <!-- 房屋地址-->
+		a.hava_land_certificate havaLandCertificate, <!-- 有无土地证(1有 0 无)-->
+		case when a.hava_land_certificate = 0 then '无'
+		         else '有' end 'havaLandCertificateName',
+		a.land_certificate_number landCertificateNumber, <!-- 土地证号-->
+		a.land_nature_id 'landNature.id', <!-- 土地性质-->
+		e.name 'landNature.name', <!-- 土地性质-->
+		a.property_value propertyValue, <!-- 房产价值-->
+		a.attach_id attachId, <!-- 附件-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+    
+    <select id="listPropertyByPage" resultType="com.xuwei.bean.CustomerProperty">
+    	select <include refid="propertyBaseColumns" />
+    	from t_customer_property a
+    	LEFT JOIN t_area b ON b.id = a.area_id
+    	LEFT JOIN t_plot c ON c.id = a.plot_id 
+    	LEFT JOIN t_dict d ON d.id = a.housing_nature_id
+    	LEFT JOIN t_dict e ON e.id = a.land_nature_id
+    	where a.customer_id = #{customerid}
+    </select>
+    
+    <select id="getCustomerPropertyList" resultType="com.xuwei.bean.CustomerProperty">
+    	select 
+    		id id,
+    		certificate certificate,
+    		owner owner,
+    		area area,
+    		property_value propertyValue
+    	from t_customer_property
+    	where customer_id = #{customerid}
+    </select>
+    
+    <select id="getCustomerPropertyInfo" resultType="com.xuwei.bean.CustomerProperty">
+    	select <include refid="propertyBaseColumns" />
+    	from t_customer_property a
+    	LEFT JOIN t_area b ON b.id = a.area_id
+    	LEFT JOIN t_plot c ON c.id = a.plot_id 
+    	LEFT JOIN t_dict d ON d.id = a.housing_nature_id
+    	LEFT JOIN t_dict e ON e.id = a.land_nature_id
+    	where a.id = #{id}
+    </select>
+    <select id="selectPageByEw" resultType="com.xuwei.bean.CustomerProperty">
+		select <include refid="propertyBaseColumns" />
+		from t_customer_property a
+		LEFT JOIN t_area b ON b.id = a.area_id
+		LEFT JOIN t_plot c ON c.id = a.plot_id
+		LEFT JOIN t_dict d ON d.id = a.housing_nature_id
+		LEFT JOIN t_dict e ON e.id = a.land_nature_id
+		<if test="ew!=null and ew.sqlSegment!=null">
+			${ew.sqlSegment}
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.IncomeDistributeMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.IncomeDistribute">
+		<id column="id" property="id" />
+		<result column="income_id" property="income.id" />
+		<result column="order_income_id" property="orderIncome.id" />
+		<result column="order_loan_id" property="orderLoan.id" />
+		<result column="amount" property="amount" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id 'id', <!-- id-->
+		a.order_loan_id 'orderLoan.id', <!-- 订单借款-->
+		case 
+			when a.order_income_id is not null then a.order_income_id
+		 	when a.order_loan_id is not null then a.order_loan_id
+		end as 'orderIncome.id',
+		case 
+			when a.order_income_id is not null then 1
+		 	when a.order_loan_id is not null then 2
+		end as 'type',
+		case 
+			when a.order_income_id is not null then concat(e.name,"（元）")
+		 	when a.order_loan_id is not null then concat('回款',"（万元）")
+		end as 'costType',
+		case 
+			when a.order_income_id is not null then c.receive_amount
+		 	when a.order_loan_id is not null then d.receive_amount
+		end as 'receiveAmount',
+		case 
+			when a.order_income_id is not null then c.received_amount
+		 	when a.order_loan_id is not null then d.received_amount
+		end as 'receivedAmount',
+		case 
+			when a.order_income_id is not null then c.receiving_amount
+		 	when a.order_loan_id is not null then d.receiving_amount
+		end as 'receivingAmount',
+		case 
+			when a.order_income_id is not null then a.amount
+		 	when a.order_loan_id is not null then a.amount/10000
+		end as 'amount', <!-- 本次分配金额-->
+		a.note 'note', <!-- 备注-->
+		a.creator_id 'creatorId', <!-- 创建人-->
+		a.create_time 'createTime', <!-- 创建时间-->
+		a.last_modify_time 'lastModifyTime', <!-- 最后修改时间-->
+		a.last_modifier_id 'lastModifierId' <!-- 最后修改人-->
+    </sql>
+    <select id="listByPage" resultType="com.xuwei.bean.IncomeDistribute">
+    	select <include refid="baseColumns"></include>
+    	from t_income_distribute a
+    	left join t_income b on b.id =a.income_id
+    	left join t_order_income c on c.id =a.order_income_id
+    	left join t_order_loan d on d.id=a.order_loan_id
+    	left join t_dict e on e.id =c.cost_type_id
+    	where b.id=#{incomeId}
+    </select>
+    <select id="selectIncomeDistribute" resultType="com.xuwei.bean.IncomeDistribute">
+    	select 
+    	a.id,
+    	a.order_loan_id 'orderLoan.id',
+    	d.receive_amount 'orderLoan.receiveAmount',
+    	d.receiving_amount 'orderLoan.receivingAmount',
+    	d.received_amount 'orderLoan.receivedAmount',
+    	a.order_income_id 'orderIncome.id',
+    	c.receive_amount 'orderIncome.receiveAmount',
+    	c.receiving_amount 'orderIncome.receivingAmount',
+    	c.received_amount 'orderIncome.receivedAmount',
+    	a.amount 'amount', <!-- 本次分配金额-->
+		a.note 'note', <!-- 备注-->
+		a.creator_id 'creatorId', <!-- 创建人-->
+		a.create_time 'createTime', <!-- 创建时间-->
+		a.last_modify_time 'lastModifyTime', <!-- 最后修改时间-->
+		a.last_modifier_id 'lastModifierId' <!-- 最后修改人-->
+		from t_income_distribute a
+    	left join t_income b on b.id =a.income_id
+    	left join t_order_income c on c.id =a.order_income_id
+    	left join t_order_loan d on d.id=a.order_loan_id
+    	<where>
+    		<if test="m!=null and m.id!=null">
+    			a.id=#{m.id}
+    		</if>
+    		<if test="m!=null and m.income!=null and m.income.id!=null">
+    			a.income_id=#{m.income.id}
+    		</if>
+    	</where>
+    </select>
+</mapper>

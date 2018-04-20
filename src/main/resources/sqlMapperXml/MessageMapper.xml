@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.MessageMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Message">
+		<id column="id" property="id" />
+		<result column="msg_type" property="msgType" />
+		<result column="remind_time" property="remindTime" />
+		<result column="msg_content" property="msgContent" />
+		<result column="user_id" property="userId" />
+		<result column="todo_id" property="todoId" />
+		<result column="status" property="status" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		msg_type msgType, <!-- 消息类型(1任务提前提醒2任务延期提醒)-->
+		remind_time remindTime, <!-- 提醒时间（年月日时分）-->
+		msg_content msgContent, <!-- 信息内容-->
+		user_id userId, <!-- 通知人-->
+		todo_id todoId, <!-- 待办任务-->
+		status status, <!-- 状态（1：已读  0：未读）-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+    
+	<select id="getMessageList" resultType="com.xuwei.bean.Message">
+		select
+			<include refid="baseColumns"></include>
+		from t_message
+		where user_id = #{userId} and remind_time <![CDATA[ <= ]]> date(now())
+			<if test="m.status != null">
+				and status = #{m.status}
+			</if>
+		ORDER BY status ASC,remind_time DESC
+	</select>
+	
+	<select id="getMessageWXList" resultType="com.xuwei.bean.Message">
+		select
+			<include refid="baseColumns"></include>
+		from t_message
+		where user_id = #{userId} and remind_time <![CDATA[ <= ]]> date(now()) and status = 0
+		ORDER BY status ASC,remind_time DESC
+	</select>
+	
+	<select id="getMessageNum" resultType="int">
+		select
+			count(*)
+		from t_message
+		where user_id = #{userId} and remind_time <![CDATA[ <= ]]> date(now()) and status = 0
+	</select>
+</mapper>

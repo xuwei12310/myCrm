@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.ScheduleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<!-- <resultMap id="BaseResultMap" type="com.xuwei.bean.Schedule">
+		<id column="id" property="id" />
+		<result column="schedule_name" property="scheduleName" />
+		<result column="product_id" property="dict.id"/>
+		<result column="array" property="array" />
+		<result column="role" property="role" />
+		<result column="duration" property="duration" />
+		<result column="remind" property="remind" />
+		<result column="remind_unit" property="remindUnit" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap> -->
+	
+   <!-- 取下个排序值 -->
+    <select id="nextArray" resultType="int">
+        select
+            case 
+                when max(array) is null then 1
+                else (max(array) + 1)
+            end
+        from t_product_schedule
+    </select>
+       <update id="changeArray" >
+        UPDATE t_product_schedule
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_product_schedule where  id=#{destId})
+                        else (select array from t_product_schedule where id=#{srcId})
+                    END array
+            FROM t_product_schedule
+            where id in (#{srcId},#{destId})) a ON t_product_schedule.id=a.id
+        SET t_product_schedule.array=a.array
+  </update>
+  
+  <select id="getTypeBylist" resultType="com.xuwei.bean.Schedule">
+  	select
+  		a.id id,
+  		a.schedule_name scheduleName
+  	from t_product_schedule a
+  	LEFT JOIN t_dict b ON b.id = a.product_id
+  	where b.id = #{productType}
+  	ORDER BY a.array ASC
+  </select>
+</mapper>

@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.PayMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Pay">
+		<id column="id" property="id" />
+		<result column="source" property="source" />
+		<result column="cost_type_id" property="costType.id" />
+		<result column="pay_object_type" property="payObjectType" />
+		<result column="is_cost" property="isCost" />
+		<result column="order_id" property="order.id" />
+		<result column="customer_id" property="customer.id" />
+		<result column="assessment_company_id" property="assessmentCompany.id" />
+		<result column="bank_subbranch_id" property="bankSubbranch.id" />
+		<result column="other_partners_id" property="otherPartners.id" />
+		<result column="estimate_pay_amount" property="estimatePayAmount" />
+		<result column="pay_time" property="payTime" />
+		<result column="pay_amount" property="payAmount" />
+		<result column="pay_bank_account_id" property="payBankAccount.id" />
+		<result column="receive_account_name" property="receiveAccountName" />
+		<result column="receive_account_bank" property="receiveAccountBank" />
+		<result column="receive_account_number" property="receiveAccountNumber" />
+		<result column="submit_date" property="submitDate" />
+		<result column="submit_user_id" property="submitUser.id" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="process_instance_id" property="processInstanceId" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id 'id', <!-- id-->
+		a.source 'source', <!-- 来源1订单结算2添加-->
+		a.cost_type_id 'costType.id', <!-- 费用类型-->
+		c.name "costType.name",
+		a.pay_object_type 'payObjectType', <!-- 支出对象1评估公司2合作银行3其他合作伙伴4客户-->
+		a.is_cost 'isCost', <!-- 是否成本1是0否-->
+		a.order_id 'order.id', <!-- 订单-->
+		b.order_code 'order.orderCode',
+		case 
+			when a.customer_id is not null then h.customer_name
+			when a.bank_subbranch_id is not null then f.subbranch_name
+			when a.other_partners_id is not null then g.name
+			when a.assessment_company_id is not null then e.name
+		end as 'customer.customerName',
+		case 
+			when a.customer_id is not null then h.id
+			when a.bank_subbranch_id is not null then f.id
+			when a.other_partners_id is not null then g.id
+			when a.assessment_company_id is not null then e.id
+		end as 'customer.id',
+		<!-- a.customer_id 'customer.id', 客户
+		h.customer_name 'customer.customerName',
+		a.assessment_company_id 'assessmentCompany.id', 评估公司
+		a.bank_subbranch_id 'bankSubbranch.id', 合作银行
+		a.other_partners_id 'otherPartners.id', 其他合作伙伴 -->
+		a.estimate_pay_amount 'estimatePayAmount', <!-- 预计支出金额-->
+		a.pay_time 'payTime', <!-- 支出时间-->
+		a.pay_amount 'payAmount', <!-- 支出金额-->
+		a.pay_bank_account_id 'payBankAccount.id', <!-- 付款账号-->
+		d.account_number "payBankAccount.accountNumber",
+		a.receive_account_name 'receiveAccountName', <!-- 收款账户名-->
+		a.receive_account_bank 'receiveAccountBank', <!-- 收款账户开户行-->
+		a.receive_account_number 'receiveAccountNumber', <!-- 收款账户账号-->
+		a.submit_date 'submitDate', <!-- 提交时间-->
+		a.submit_user_id 'submitUser.id', <!-- 提交人-->
+		i.name 'submitUser.name',
+		a.audit_status 'auditStatus', <!-- 审批状态(0草稿1通过2未通过3未审批)-->
+		a.note 'note', <!-- 备注-->
+		a.creator_id 'creatorId', <!-- 创建人-->
+		a.create_time 'createTime', <!-- 创建时间-->
+		a.last_modify_time 'lastModifyTime', <!-- 最后修改时间-->
+		a.last_modifier_id 'lastModifierId' <!-- 最后修改人-->
+    </sql>
+	<select id="listByPage" resultType="com.xuwei.bean.Pay">
+		select <include refid="baseColumns"></include>
+		from t_pay a
+		left join t_order b on b.id=a.order_id
+		left join t_dict c on a.cost_type_id=c.id
+		left join t_org_bank_account d on a.pay_bank_account_id=d.id
+		left join t_assessment_company e on a.assessment_company_id=e.id
+		left join t_bank_subbranch f on a.bank_subbranch_id =f.id
+		left join t_other_partners g on a.other_partners_id =g.id
+		left join t_customer h on a.customer_id = h.id
+		left join t_user i on a.submit_user_id =i.id
+		left join t_user j on a.creator_id =j.id
+		left join t_organization k on k.id=j.organization_id
+		<where>
+			<if test="m!=null and m.source!=null">
+				a.source=#{m.source}
+			</if>
+			<if test="m!=null and m.costType!=null and m.costType.id!=null">
+				and a.cost_type_id=#{m.costType.id}
+			</if>
+			<if test="m!=null and m.auditStatus!=null">
+				and a.audit_status=#{m.auditStatus}
+			</if>
+			<if test="m!=null and m.submitUser!=null and m.submitUser.name!=null">
+				and i.name like concat("%",#{m.submitUser.name},"%")
+			</if>
+			<if test="m!=null and m.order!=null and m.order.id!=null">
+				and b.id =#{m.order.id}
+			</if>
+			<if test="m!=null and m.id!=null ">
+				and a.id =#{m.id}
+			</if>
+			<if test="ew!=null and ew.sqlSegment!=null">
+				${ew.sqlSegment}
+			</if>
+			and ((a.source=1 and a.audit_status=3) or a.source=2) 
+		</where>
+		order by a.create_time desc
+	</select>
+		<select id="listByBanlancePage" resultType="com.xuwei.bean.Pay">
+		select <include refid="baseColumns"></include>
+		from t_pay a
+		left join t_order b on b.id=a.order_id
+		left join t_dict c on a.cost_type_id=c.id
+		left join t_org_bank_account d on a.pay_bank_account_id=d.id
+		left join t_assessment_company e on a.assessment_company_id=e.id
+		left join t_bank_subbranch f on a.bank_subbranch_id =f.id
+		left join t_other_partners g on a.other_partners_id =g.id
+		left join t_customer h on a.customer_id = h.id
+		left join t_user i on a.submit_user_id =i.id
+		left join t_user j on a.creator_id =j.id
+		left join t_organization k on k.id=j.organization_id
+		<where>
+			<if test="m!=null and m.source!=null">
+				a.source=#{m.source}
+			</if>
+			<if test="m!=null and m.costType!=null and m.costType.id!=null">
+				and a.cost_type_id=#{m.costType.id}
+			</if>
+			<if test="m!=null and m.auditStatus!=null">
+				and a.audit_status=#{m.auditStatus}
+			</if>
+			<if test="m!=null and m.submitUser!=null and m.submitUser.name!=null">
+				and i.name like concat("%",#{m.submitUser.name},"%")
+			</if>
+			<if test="m!=null and m.order!=null and m.order.id!=null">
+				and b.id =#{m.order.id}
+			</if>
+			<if test="m!=null and m.id!=null ">
+				and a.id =#{m.id}
+			</if>
+		</where>
+	</select>
+	<update id="verifyByIds" parameterType="list">
+		update t_pay
+		<set>
+			audit_status=2
+		</set>
+		<where>
+			id in
+			<foreach collection="ids" open="(" close=")" separator="," item="id">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	<update id="updateCommission">
+		update t_pay
+			<set>
+				estimate_pay_amount=#{commissionAmount}
+				pay_amount=#{commissionAmount}
+			</set>
+			where order_id=#{orderId}
+			and cost_type_id=164
+	</update>
+</mapper>

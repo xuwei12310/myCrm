@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderScheduleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderSchedule">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="schedule_id" property="schedule.id" />
+		<result column="estimate_date" property="estimateDate" />
+		<result column="actual_date" property="actualDate" />
+		<result column="is_complete" property="isComplete" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id 'order.id', <!-- 订单-->
+		a.schedule_id 'schedule.id', <!-- 进度-->
+		a.estimate_date estimateDate, <!-- 预计完成时间(年月日)-->
+		a.actual_date actualDate, <!-- 实际完成时间(年月日)-->
+		a.is_complete isComplete, <!-- 是否完成1完成0未完成-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+	<select id="listOrderScheduleByPage" resultType="java.util.Map">
+        {call product_order_schedule(#{scheduleDictId},#{orderCodes},#{customerNames},#{pageIndex},#{pageSize},#{pageType},#{viewType},#{userId},#{organizationid})};
+    </select>
+    
+    <select id="listOrderScheduleByPageNum" resultType="java.util.Map">
+        {call product_order_schedule(#{scheduleDictId},#{orderCodes},#{customerNames},#{pageIndex},#{pageSize},#{pageType},#{viewType},#{userId},#{organizationid})};
+    </select>
+    
+    <select id="getOrderScheduleInfo" resultType="com.xuwei.bean.OrderSchedule">
+    	select
+    		id,is_complete,actual_date
+    	from t_order_schedule
+    	where order_id = #{orderid} and schedule_id = #{scheduleId}
+    </select>
+    
+    <select id="getOrderScheduleList" resultType="com.xuwei.bean.OrderSchedule">
+    	select
+    		a.id id,a.is_complete isComplete,a.schedule_id 'schedule.id',a.estimate_date
+    	from t_order_schedule a
+    	where a.order_id = #{orderId}
+    </select>
+    
+    <select id="getWXOrderScheduleList" resultType="com.xuwei.bean.OrderSchedule">
+    	select
+    		a.id id, <!-- id-->
+			a.order_id 'order.id', <!-- 订单-->
+			b.order_code 'order.orderCode',
+			a.schedule_id 'schedule.id', <!-- 进度-->
+			c.schedule_name 'schedule.scheduleName',
+			a.is_complete isComplete, <!-- 是否完成1完成0未完成-->
+			case when a.is_complete = 1 then '已完成'
+		         else '未完成' end 'isCompleteName',
+			case when c.role = 1 then g.name
+		         when  c.role = 2 then f.name
+		         when c.role = 3 then e.name
+		         when c.role = 4 then d.name
+		         else '未指定' end 'roleName',
+		    a.note note  <!-- 备注-->
+    	from t_order_schedule a	
+    	LEFT JOIN t_order b ON b.id=a.order_id
+    	LEFT JOIN t_product_schedule c ON c.id=a.schedule_id
+    	LEFT JOIN t_user d ON d.id=b.cs_assistant_id
+		LEFT JOIN t_user e ON e.id=b.cs_principal_id
+		LEFT JOIN t_user f ON f.id=b.follow_user_id
+		LEFT JOIN t_user g on g.id=b.owner_id
+    	where a.order_id = #{orderid}
+    </select>
+    
+    <select id="getWXOrderScheduleInfo" resultType="com.xuwei.bean.OrderSchedule">
+    	select
+    		a.id id, <!-- id-->
+			a.order_id 'order.id', <!-- 订单-->
+			b.order_code 'order.orderCode',
+			a.schedule_id 'schedule.id', <!-- 进度-->
+			c.schedule_name 'schedule.scheduleName',
+			a.is_complete isComplete, <!-- 是否完成1完成0未完成-->
+			case when a.is_complete = 1 then '已完成'
+		         else '未完成' end 'isCompleteName',
+			case when c.role = 1 then g.name
+		         when  c.role = 2 then f.name
+		         when c.role = 3 then e.name
+		         when c.role = 4 then d.name
+		         else '未指定' end 'roleName',
+		    case when c.role = 1 then b.owner_id
+		         when  c.role = 2 then b.follow_user_id
+		         when c.role = 3 then b.cs_principal_id
+		         when c.role = 4 then b.cs_assistant_id
+		         else '' end 'roleUserId',
+		    a.estimate_date estimateDate, <!-- 预计完成时间(年月日)-->
+			a.actual_date actualDate, <!-- 实际完成时间(年月日)-->
+		    a.note note  <!-- 备注-->
+    	from t_order_schedule a	
+    	LEFT JOIN t_order b ON b.id=a.order_id
+    	LEFT JOIN t_product_schedule c ON c.id=a.schedule_id
+    	LEFT JOIN t_user d ON d.id=b.cs_assistant_id
+		LEFT JOIN t_user e ON e.id=b.cs_principal_id
+		LEFT JOIN t_user f ON f.id=b.follow_user_id
+		LEFT JOIN t_user g on g.id=b.owner_id
+    	where a.id = #{orderScheduleId}
+    </select>
+	<select id="getOrderSheduleByOrderId" resultType="com.xuwei.bean.OrderSchedule">
+		SELECT <include refid="baseColumns"/> ,schedule_name 'schedule.scheduleName'
+		FROM t_order_schedule a
+		LEFT JOIN t_product_schedule b ON b.id=a.schedule_id
+		WHERE a.order_id = #{orderId}
+	</select>
+</mapper>

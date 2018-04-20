@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.TodoAttachMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.TodoAttach">
+		<id column="id" property="id" />
+		<result column="todo_id" property="todoId.id" />
+		<result column="attach_type" property="attachType" />
+		<result column="attach_id" property="attachId.id" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		todo_id todoId, <!-- 任务-->
+		attach_type attachType, <!-- 附件类型1任务2未完成-->
+		attach_id attachId, <!-- 附件-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+     <select id="findListByTodoId" resultType="com.xuwei.bean.TodoAttach">
+		select
+			 a.id, 
+	         a.todo_id AS 'todoId.id',
+	         a.attach_id AS 'attachId.id',
+	         c.path 'attachId.path',
+	         c.name 'attachId.name',
+	         c.extention 'attachId.extention'
+	    from t_todo_attach a
+		left join t_todo b on a.todo_id =b.id
+		left join t_attach c on a.attach_id= c.id
+		where a.todo_id = #{todoId}
+	</select>
+	<select id="selectByFAId" resultType="com.xuwei.bean.TodoAttach">
+		select 
+        a.id id, 
+		todo_id todoId, 
+		attach_type attachType, 
+		attach_id attachId
+		from t_todo_attach a
+		left join t_todo b on a.todo_id =b.id
+		left join t_attach c on a.attach_id= c.id
+		where a.id=#{id}
+	</select>
+</mapper>

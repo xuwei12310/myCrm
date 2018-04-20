@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.DictMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Dict">
+		<id column="id" property="id" />
+		<result column="dict_type" property="dictType" />
+		<result column="code" property="code" />
+		<result column="name" property="name" />
+		<result column="status" property="status" />
+		<result column="name_en" property="nameEn" />
+		<result column="is_sys" property="isSys" />
+		<result column="array" property="array" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- 字典id-->
+		dict_type dictType, <!-- 类型【会议人员类型participants_category单位类型company_category】-->
+		code code, <!-- 编号-->
+		name name, <!-- 名称-->
+		status status, <!-- 状态1启用0禁用-->
+		name_en nameEn, <!-- 名称_英文-->
+		is_sys isSys, <!-- 是否系统内置【是1、否0】-->
+		array array, <!-- 排序-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+	 <select id="nextArray" resultType="int">
+        select
+            case 
+                when max(array) is null then 1
+                else (max(array) + 1)
+            end
+        from t_dict
+        where dict_type = #{dictType}
+    </select>
+       <update id="changeArray" >
+        UPDATE t_dict 
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_dict where  id=#{destId})
+                        else (select array from t_dict where id=#{srcId})
+                    END array
+            FROM t_dict
+            where id in (#{srcId},#{destId})) a ON t_dict.id=a.id
+        SET t_dict.array=a.array
+  </update>
+  
+  <select id="getDictList" resultType="com.xuwei.bean.Dict">
+  	select * 
+  	from t_dict
+  	where id = #{id} and status = 1
+  </select>
+</mapper>

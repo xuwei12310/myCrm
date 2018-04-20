@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.RelatedMaterialsMapper">
+
+<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.RelatedMaterials">
+		<id column="id" property="id" />
+		<result column="code" property="code" />
+		<result column="name" property="name" />
+		<result column="note" property="note" />
+		<result column="number" property="number" />
+		<result column="is_sys" property="isSys" />
+		<result column="array" property="array" />
+		<result column="status" property="status" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+ 
+   <!-- 取下个排序值 -->
+    <select id="nextArray" resultType="int">
+        select
+            case 
+                when max(array) is null then 1
+                else (max(array) + 1)
+            end
+        from t_related_materials
+    </select>
+       <update id="changeArray" >
+        UPDATE t_related_materials
+        INNER JOIN (SELECT 
+                    id,
+                    case
+                        when id = #{srcId} then (select array from t_related_materials where  id=#{destId})
+                        else (select array from t_related_materials where id=#{srcId})
+                    END array
+            FROM t_related_materials
+            where id in (#{srcId},#{destId})) a ON t_related_materials.id=a.id
+        SET t_related_materials.array=a.array
+  </update>
+</mapper>

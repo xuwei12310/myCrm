@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xuwei.mapper.ActivitiMapper">
+
+    <!--查询待办任务-->
+    <select id="queryTodoTask" resultType="java.util.Map">
+        SELECT
+        DISTINCT f.KEY_ procDefKey,e.`name` applyUser,c.NAME_ procInstName,a.NAME_ taskName,a.ID_ taskId,c.BUSINESS_KEY_
+        businessKey,a.CREATE_TIME_ createTime,a.FORM_KEY_ formKey
+        FROM act_ru_task a
+        LEFT JOIN act_ru_identitylink b ON a.ID_ = b.TASK_ID_
+        LEFT JOIN act_ru_execution c ON a.PROC_INST_ID_ = c.ID_
+        LEFT JOIN act_ru_identitylink d ON a.PROC_INST_ID_ = d.PROC_INST_ID_ AND d.TYPE_ = 'starter'
+        LEFT JOIN t_user e ON d.USER_ID_ = e.id
+        LEFT JOIN act_re_procdef f ON a.PROC_DEF_ID_ = f.ID_
+        WHERE a.SUSPENSION_STATE_ = 1
+        AND (a.ASSIGNEE_ = #{userId} OR (a.ASSIGNEE_ IS NULL AND (b.USER_ID_ = #{userId} OR b.GROUP_ID_ IN (SELECT
+        a.GROUP_ID_ FROM ACT_ID_MEMBERSHIP a WHERE a.USER_ID_ = #{userId} ) ) ) )
+        <if test="applyUserName!=null">
+            AND e.`name` LIKE "%"${applyUserName}"%"
+        </if>
+        ORDER BY a.CREATE_TIME_ DESC
+    </select>
+    <!--查询批住-->
+    <select id="queryCommentsByProcessInstanceId" resultType="java.util.Map">
+        SELECT
+        	b.NAME_ as taskName, c.`name` userName,a.TYPE_ action, a.TIME_  time,a.MESSAGE_ msg,
+        		d.NAME_ procDefName
+        		FROM ACT_HI_COMMENT a
+        		LEFT JOIN ACT_HI_TASKINST b ON a.TASK_ID_ = b.ID_
+        		LEFT JOIN t_user c ON a.USER_ID_ = c.id
+        		LEFT JOIN act_re_procdef d ON b.PROC_DEF_ID_ = d.ID_
+        		WHERE a.PROC_INST_ID_ = #{processInstanceId}
+        		ORDER BY a.TIME_ DESC
+    </select>
+    <!--查询已完成的-->
+    <select id="queryDoneTask" resultType="java.util.Map">
+        SELECT
+        c.KEY_ AS processInstanceKey, d.NAME_ processInstanceName,
+        b.NAME_ AS taskName, a.TYPE_ action, a.TIME_ time, a.MESSAGE_ msg, d.BUSINESS_KEY_ businessKey ,
+        f.`name` applyUser
+        FROM ACT_HI_COMMENT a
+        LEFT JOIN ACT_HI_TASKINST b on a.TASK_ID_ = b.ID_
+        LEFT JOIN act_re_procdef c on b.PROC_DEF_ID_ = c.ID_
+        LEFT JOIN ACT_HI_PROCINST d on b.PROC_INST_ID_ = d.ID_
+        LEFT JOIN act_hi_identitylink e ON a.PROC_INST_ID_ = e.PROC_INST_ID_ AND e.TYPE_ = 'starter'
+        LEFT JOIN t_user f ON e.USER_ID_ = f.id
+        WHERE a.USER_ID_=#{userId} and (a.TYPE_ = '同意' or a.TYPE_ ='驳回')
+        <if test="applyUserName!=null">
+            AND f.`name` LIKE "%"${applyUserName}"%"
+        </if>
+        ORDER BY a.TIME_ DESC
+    </select>
+    <!--查询我提交的-->
+    <select id="querySubmitTask" resultType="java.util.Map">
+        (SELECT DISTINCT
+        b.KEY_ processInstanceKey,
+         b.NAME_ processInstanceName,
+         a.NAME_ taskName,
+         f.TYPE_ action,
+         f.TIME_ time,
+         f.MESSAGE_ msg,
+         g.BUSINESS_KEY_ businessKey,
+         e.`name` applyUser
+        FROM
+            ACT_RU_TASK a
+        LEFT JOIN ACT_RE_PROCDEF b ON a.PROC_DEF_ID_ = b.ID_
+        LEFT JOIN ACT_RU_VARIABLE c ON c.PROC_INST_ID_ = a.PROC_INST_ID_
+        LEFT JOIN act_ru_identitylink d ON d.TASK_ID_ = a.ID_
+        LEFT JOIN t_user e ON e.id = d.USER_ID_
+        LEFT JOIN act_hi_comment f ON f.TASK_ID_ = a.ID_
+        LEFT JOIN act_ru_execution g ON a.EXECUTION_ID_ = g.ID_
+        WHERE
+            e.id = #{userId}
+        )
+        UNION ALL
+        (SELECT
+            c1.KEY_  processInstanceKey,
+            d1.NAME_ processInstanceName,
+            b1.NAME_  taskName,
+            a1.TYPE_ action,
+            a1.TIME_ time,
+            a1.MESSAGE_ msg,
+            d1.BUSINESS_KEY_ businessKey,
+            f1.`name` applyUser
+        FROM
+            ACT_HI_COMMENT a1
+        LEFT JOIN ACT_HI_TASKINST b1 ON a1.TASK_ID_ = b1.ID_
+        LEFT JOIN act_re_procdef c1 ON b1.PROC_DEF_ID_ = c1.ID_
+        LEFT JOIN ACT_HI_PROCINST d1 ON b1.PROC_INST_ID_ = d1.ID_
+        LEFT JOIN act_hi_identitylink e1 ON a1.PROC_INST_ID_ = e1.PROC_INST_ID_
+        AND e1.TYPE_ = 'starter'
+        LEFT JOIN t_user f1 ON e1.USER_ID_ = f1.id
+        WHERE
+            a1.USER_ID_ = #{userId}
+        )
+    </select>
+</mapper>

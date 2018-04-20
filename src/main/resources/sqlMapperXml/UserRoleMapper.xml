@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.UserRoleMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.UserRole">
+		<id column="id" property="id" />
+		<result column="role_id" property="roleId" />
+		<result column="user_id" property="userId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	<sql id="baseColumns">
+		id, role_id, user_id, create_time, last_modify_time, note, creator_id, last_modifier_id
+	</sql>
+
+	<insert id="insert" parameterType="UserRole">
+		insert into t_user_role (<include refid="baseColumns" />)
+		values (#{id,jdbcType=BIGINT}, #{roleId,jdbcType=BIGINT}, #{userId,jdbcType=BIGINT},
+		#{createTime,jdbcType=VARCHAR}, #{lastModifyTime,jdbcType=VARCHAR}, #{note,jdbcType=VARCHAR},
+		#{creatorId,jdbcType=BIGINT}, #{lastModifierId,jdbcType=BIGINT})
+	</insert>
+
+	<insert id="insertBatch" parameterType="java.util.List">
+		insert into t_user_role (<include refid="baseColumns" />) values
+		<foreach collection="list" item="item" index="index" separator=",">
+			(#{item.id},#{item.roleId},#{item.userId},#{item.createTime},#{item.lastModifyTime}, #{item.note},
+			#{item.creatorId}, #{item.lastModifierId})
+		</foreach>
+	</insert>
+	<delete id="deleteBatchByRoleIdAndUserId"  parameterType="java.util.List">
+		delete from t_user_role
+		<where>
+			<foreach collection="list" item="item" index="index" separator=" or ">
+				(role_id = #{item.roleId} and user_id = #{item.userId})
+			</foreach>
+		</where>
+	</delete>
+	<delete id="deleteByUserId" parameterType="long" >
+		delete from t_user_role
+		where user_id =#{id}
+	</delete>
+	<select id="getGrantRole" resultType="long">
+		select a.role_id
+		from t_user_role a
+		where a.user_id = #{userId}
+	</select>
+</mapper>

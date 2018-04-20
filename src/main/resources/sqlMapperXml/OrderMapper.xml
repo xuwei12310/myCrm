@@ -1,0 +1,459 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.Order">
+		<id column="id" property="id" />
+		<result column="order_code" property="orderCode" />
+		<result column="customer_id" property="customer.id" />
+		<result column="product_id" property="product.id" />
+		<result column="property_id" property="propertyId" />
+		<result column="bank_id" property="bank.id" />
+		<result column="branch_id" property="branch.id" />
+		<result column="signing_date" property="signingDate" />
+		<result column="estimate_finish_time" property="estimateFinishTime" />
+		<result column="loan_amount" property="loanAmount" />
+		<result column="lending_rate" property="lendingRate" />
+		<result column="loan_term" property="loanTerm" />
+		<result column="repay_way_id" property="repayWay.id" />
+		<result column="service_charge_percent" property="serviceChargePercent" />
+		<result column="service_charge" property="serviceCharge" />
+		<result column="matchmaker_id" property="matchmaker.id" />
+		<result column="commission_amount" property="commissionAmount" />
+		<result column="commission_reason" property="commissionReason" />
+		<result column="cs_assistant_id" property="csAssistant.id" />
+		<result column="cs_principal_id" property="csPrincipal.id" />
+		<result column="follow_user_id" property="followUser.id" />
+		<result column="owner_id" property="owner.id" />
+		<result column="audit_status" property="auditStatus" />
+		<result column="status" property="status" />
+		<result column="cost" property="cost" />
+		<result column="receive_amount" property="receiveAmount" />
+		<result column="pay_amount" property="payAmount" />
+		<result column="company_loan_amount" property="companyLoanAmount" />
+		<result column="company_loan_interest" property="companyLoanInterest" />
+		<result column="receivables_account_status" property="receivablesAccountStatus" />
+		<result column="loan_date" property="loanDate" />
+		<result column="loan_money" property="loanMoney" />
+		<result column="settlement_charge" property="settlementCharge" />
+		<result column="settlement_clerk" property="settlementClerk" />
+		<result column="settlement_audit_status" property="settlementAuditStatus" />
+		<result column="settlement_submit_date" property="settlementSubmitDate" />
+		<result column="settlement_submit_user_id" property="settlementSubmitUser.id" />
+		<result column="brokerage_audit_status" property="brokerageAuditStatus" />
+		<result column="brokerage_grant_state" property="brokerageGrantState" />
+		<result column="brokerage_total" property="brokerageTotal" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_code orderCode, <!-- 订单编号(年月日+两位流水）-->
+		a.customer_id "customer.id", <!-- 客户-->
+		b.customer_name "customer.customerName",
+		a.product_id "product.id", <!-- 产品-->
+		e.name "product.name",
+		a.property_id propertyId, <!-- 抵押房产-->
+		a.bank_id "bank.id", <!-- 银行-->
+		c.bank_name "bank.bankName",
+		a.branch_id "branch.id", <!-- 支行-->
+		d.subbranch_name "branch.subbranchName",
+		a.signing_date signingDate, <!-- 签约日期（年月日）-->
+		a.estimate_finish_time estimateFinishTime, <!-- 预计完成日期（年月日）-->
+		a.loan_amount loanAmount, <!-- 贷款金额（万元）-->
+		a.lending_rate lendingRate, <!-- 月利率（厘/月）-->
+		a.loan_term loanTerm, <!-- 贷款年限-->
+		a.repay_way_id "repayWay.id", <!-- 还款方式-->
+		f.name "repayWay.name",
+		a.service_charge_percent serviceChargePercent, <!-- 手续费百分比（%）-->
+		a.service_charge serviceCharge, <!-- 手续费（元）-->
+		a.commission_amount commissionAmount, <!-- 返佣金额-->
+		a.commission_reason commissionReason, <!-- 返佣理由-->
+		a.commission_rate commissionRate, <!-- 返佣比例-->
+		a.cs_assistant_id "csAssistant.id", <!-- 客服助理-->
+		g.name "csAssistant.name",
+		a.cs_principal_id "csPrincipal.id", <!-- 客服负责人-->
+		h.name "csPrincipal.name",
+		a.follow_user_id "followUser.id", <!-- 跟单人-->
+		i.name "followUser.name",
+		a.owner_id "owner.id", <!-- 拥有人-->
+		j.name "owner.name",
+		a.matchmaker_id "matchmaker.id",<!-- 介绍人-->
+		a.audit_status auditStatus, <!-- 审核状态（1草稿2审核中3审核通过4审核不通过）-->
+		a.process_instance_id processInstanceId,<!-- 工作流id-->
+		a.status status, <!-- 状态（1已立项2已签约3已放款4完结）-->
+		a.cost cost, <!-- 订单成本（元）-->
+		a.receive_amount receiveAmount, <!-- 应收金额（元）-->
+		a.pay_amount payAmount, <!-- 应付金额（元）-->
+		a.company_loan_amount companyLoanAmount, <!-- 借款总金额（万元）-->
+		a.company_loan_interest companyLoanInterest, <!-- 借款利息总额（元）-->
+		a.receivables_account_status receivablesAccountStatus, <!-- 收款账户审核状态（1草稿2审核中3审核通过4审核不通过）-->
+		a.loan_date loanDate, <!-- 放款日期-->
+		a.loan_money loanMoney, <!-- 放款金额-->
+		a.settlement_charge settlementCharge, <!-- 结算手续费-->
+		a.settlement_clerk settlementClerk, <!-- 结算员-->
+		a.settlement_audit_status 'settlementAuditStatus',<!-- 结算审核状态-->
+		a.brokerage_audit_status brokerageAuditStatus,
+		a.brokerage_grant_state brokerageGrantState,
+		a.brokerage_total brokerageTotal,
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		k.name createName,
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId <!-- 最后修改人-->
+    </sql>
+
+	<select id="selectPageByType" resultType="com.xuwei.bean.Order">
+		SELECT
+		<include refid="baseColumns"/> ,l.name "matchmaker.name"
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		LEFT JOIN t_other_partners l ON l.id=a.matchmaker_id
+		<include refid="selectWhere"/>
+	</select>
+	<sql id="selectWhere">
+		<if test="ew.entity!=null">
+			WHERE 1=1
+			<if test="ew.entity.orderCode!=null">
+				AND a.order_code like concat("%",#{ew.entity.orderCode},"%")
+			</if>
+			<if test="ew.entity.customer!=null and ew.entity.customer.customerName!=null">
+				AND a.customer_id in( select id from t_customer where customer_name like concat("%",#{ew.entity.customer.customerName},"%"))
+			</if>
+			<if test="ew.entity.product!=null and ew.entity.product.id!=null">
+				AND a.product_id = #{ew.entity.product.id}
+			</if>
+			<if test="ew.entity.owner!=null and ew.entity.owner.name!=null">
+				AND a.owner_id in (select id from t_user where name like concat("%",#{ew.entity.owner.name},"%"))
+			</if>
+			<if test="ew.entity.signingDateStart!=null">
+				AND a.signing_date >= #{ew.entity.signingDateStart}
+			</if>
+			<if test="ew.entity.signingDateEnd!=null">
+				AND a.signing_date <![CDATA[ <= ]]> #{ew.entity.signingDateEnd}
+			</if>
+			<if test="ew.entity.estimateFinishTimeStart!=null">
+				AND a.estimate_finish_time >= #{ew.entity.estimateFinishTimeStart}
+			</if>
+			<if test="ew.entity.estimateFinishTimeEnd!=null">
+				AND a.estimate_finish_time <![CDATA[ <= ]]> #{ew.entity.estimateFinishTimeEnd}
+			</if>
+			<if test="ew.entity.settlementAuditStatus!=null">
+				AND (a.settlement_audit_status = #{ew.entity.settlementAuditStatus}
+					or a.settlement_audit_status is null
+				)
+			</if>
+			<if test="type==1">
+				AND (
+				a.owner_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				or a.cs_assistant_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				or a.cs_principal_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				or a.follow_user_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				)
+			</if>
+			<if test="type==2">
+				and (a.owner_id =#{userid} or a.cs_assistant_id=#{userid} or a.cs_principal_id=#{userid} or a.follow_user_id=#{userid})
+			</if>
+		</if>
+		ORDER BY a.id DESC
+	</sql>
+	<select id="selectById" resultType="com.xuwei.bean.Order">
+		SELECT
+		<include refid="baseColumns"/> ,l.name "matchmaker.name"
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		LEFT JOIN t_other_partners l ON l.id=a.matchmaker_id
+		WHERE a.id=#{id}
+	</select>
+	<select id="orderCombobox" resultType="com.xuwei.bean.Order">
+		select a.id 'id',concat(order_code,"(",b.name,")") 'orderCode'
+		from t_order a
+		left join t_user b on a.owner_id=b.id
+		<where>
+			a.owner_id=#{userId}
+		and 
+			(a.status=4 or a.status=3)
+		and 
+		    a.settlement_audit_status is null	
+		</where>
+	</select>
+	<select id="listOrderBalanceByPage" resultType="com.xuwei.bean.Order">
+		SELECT
+		<include refid="baseColumns"/>
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		LEFT JOIN t_organization l   on l.id=j.organization_id
+		<where>
+			<if test="m!=null and m.orderCode!=null">
+				and a.order_code like concat("%",#{m.orderCode},"%")
+			</if>
+			<if test="m!=null and m.customer!=null and m.customer.customerName!=null">
+				and b.customer_name like concat("%",#{m.customer.customerName},"%")
+			</if>
+			<if test="m!=null and m.id!=null">
+				and a.id=#{m.id}
+			</if>
+			<if test="ew!=null and ew.sqlSegment!=null">
+				${ew.sqlSegment}
+			</if>
+				and a.settlement_audit_status is not null
+		</where>
+		order by a.create_time desc
+	</select>
+	<update id="deleteBalanceByIds">
+		update t_order 
+		set settlement_audit_status=null
+		<where>
+			id in 
+			<foreach collection="ids" open="(" close=")" separator="," item="id">
+				#{id}
+			</foreach>
+		</where>
+	</update>
+	<!-- 全部订单  -->
+	<select id="getOrderList" resultType="com.xuwei.bean.Order">
+		SELECT 
+			<include refid="baseColumns"/>
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where 1=1 
+			<if test="searchValue != null">
+				and b.customer_name like concat('%',#{searchValue},'%')
+			</if>
+			and (a.creator_id = ${userId}
+			OR a.owner_id = ${userId}
+			OR a.cs_assistant_id = ${userId}
+			OR a.cs_principal_id = ${userId}
+			OR a.follow_user_id = ${userId})
+		ORDER BY a.id DESC
+	</select>
+	<!-- 今日更新  -->
+	<select id="getOrderTodayUpdateList" resultType="com.xuwei.bean.Order">
+		SELECT 
+			<include refid="baseColumns"/>
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where 1=1 and a.last_modify_time <![CDATA[ >= ]]> #{currentTime} 
+			<if test="searchValue != null">
+				and b.customer_name like concat('%',#{searchValue},'%')
+			</if>
+		and (a.creator_id = ${userId}
+		OR a.owner_id = ${userId}
+		OR a.cs_assistant_id = ${userId}
+		OR a.cs_principal_id = ${userId}
+		OR a.follow_user_id = ${userId})
+		ORDER BY a.id DESC
+	</select>
+	<!-- 近一周   -->
+	<select id="getOrderNearlyAWeekList" resultType="com.xuwei.bean.Order">
+		SELECT 
+			<include refid="baseColumns"/>
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where 1=1 and date_sub(#{currentTime}, INTERVAL 7 DAY) <![CDATA[ <= ]]> date(a.last_modify_time)
+			<if test="searchValue != null">
+				and b.customer_name like concat('%',#{searchValue},'%')
+			</if>
+			and (a.creator_id = ${userId}
+			OR a.owner_id = ${userId}
+			OR a.cs_assistant_id = ${userId}
+			OR a.cs_principal_id = ${userId}
+			OR a.follow_user_id = ${userId})
+		ORDER BY a.id DESC
+	</select>
+	<!-- 近一个月  -->
+	<select id="getOrderNearlyAMonthList" resultType="com.xuwei.bean.Order">
+		SELECT 
+			<include refid="baseColumns"/>
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where 1=1 and date_sub(#{currentTime}, INTERVAL 30 DAY) <![CDATA[ <= ]]> date(a.last_modify_time)
+			<if test="searchValue != null">
+				and b.customer_name like concat('%',#{searchValue},'%')
+			</if>
+			and (a.creator_id = ${userId}
+			OR a.owner_id = ${userId}
+			OR a.cs_assistant_id = ${userId}
+			OR a.cs_principal_id = ${userId}
+			OR a.follow_user_id = ${userId})
+		ORDER BY a.id DESC
+	</select>
+	
+	<select id="getOrderInfo" resultType="com.xuwei.bean.Order">
+		SELECT 
+			<include refid="baseColumns"/>,l.name "matchmaker.name"
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		LEFT JOIN t_other_partners l ON l.id=a.matchmaker_id
+		WHERE a.id = #{orderid}
+	</select>
+	<!-- 获取订单佣金信息 -->
+	<select id="getOrderBrokerageList" resultType="com.xuwei.bean.Order">
+		select
+			a.id id, <!-- id-->
+			a.order_code orderCode, <!-- 订单编号(年月日+两位流水）-->
+			a.customer_id "customer.id", <!-- 客户-->
+			b.customer_name "customer.customerName",
+			a.signing_date signingDate, <!-- 签约日期（年月日）-->
+			a.loan_amount loanAmount, <!-- 贷款金额（万元）-->
+			a.lending_rate lendingRate, <!-- 月利率（厘/月）-->
+			a.commission_amount commissionAmount, <!-- 返佣金额-->
+			a.commission_rate commissionRate, <!-- 返佣比例-->
+			a.cs_assistant_id "csAssistant.id", <!-- 客服助理-->
+			g.name "csAssistant.name",
+			a.cs_principal_id "csPrincipal.id", <!-- 客服负责人-->
+			h.name "csPrincipal.name",
+			a.follow_user_id "followUser.id", <!-- 跟单人-->
+			i.name "followUser.name",
+			a.owner_id "owner.id", <!-- 拥有人-->
+			j.name "owner.name",
+			a.cost cost, <!-- 订单成本（元）-->
+			a.receive_amount receiveAmount, <!-- 应收金额（元）-->
+			a.pay_amount payAmount, <!-- 应付金额（元）-->
+			a.company_loan_amount companyLoanAmount, <!-- 借款总金额（万元）-->
+			a.company_loan_interest companyLoanInterest, <!-- 借款利息总额（元）-->
+			a.loan_date loanDate, <!-- 放款日期-->
+			a.loan_money loanMoney, <!-- 放款金额-->
+			a.settlement_charge settlementCharge, <!-- 结算手续费-->
+			a.settlement_clerk settlementClerk, <!-- 结算员-->
+			a.note note, <!-- 备注-->
+			a.brokerage_audit_status brokerageAuditStatus,
+			a.brokerage_grant_state brokerageGrantState,
+			a.brokerage_total brokerageTotal
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where 1=1 and a.settlement_audit_status = 3
+			<if test="viewType == 1">
+				AND (
+				a.owner_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				or a.cs_assistant_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				or a.cs_principal_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				or a.follow_user_id in (select aa.id from t_user aa where aa.organization_id = (SELECT bb.organization_id from t_user bb where bb.id=#{userid}))
+				)
+			</if>
+			<if test="viewType == 2">
+				and (a.owner_id =#{userid} or a.cs_assistant_id=#{userid} or a.cs_principal_id=#{userid} or a.follow_user_id=#{userid})
+			</if>
+			<if test="m.orderCode != null">
+				and a.order_code like concat('%',#{m.orderCode},'%')
+			</if>
+			<if test="m.brokerageGrantState != null">
+				and a.brokerage_grant_state = #{m.brokerageGrantState}
+			</if>
+		ORDER BY a.id DESC
+	</select>
+	<select id="getCustomerOrderList" resultType="com.xuwei.bean.Order">
+		SELECT 
+			<include refid="baseColumns"/>
+		FROM t_order a
+		LEFT JOIN t_customer b       ON b.id=a.customer_id
+		LEFT JOIN t_bank c           ON c.id=a.bank_id
+		LEFT JOIN t_bank_subbranch d ON d.id=a.branch_id
+		LEFT JOIN t_dict e           ON e.id=a.product_id
+		LEFT JOIN t_dict f           ON f.id=a.repay_way_id
+		LEFT JOIN t_user g           ON g.id=a.cs_assistant_id
+		LEFT JOIN t_user h           ON h.id=a.cs_principal_id
+		LEFT JOIN t_user i           ON i.id=a.follow_user_id
+		LEFT JOIN t_user j           on j.id=a.owner_id
+		LEFT JOIN t_user k           on k.id=a.creator_id
+		where a.customer_id = #{customerId}
+		ORDER BY a.id DESC
+	</select>
+	
+	<select id="getOrderProductTypeList" resultType="com.xuwei.bean.Order">
+		SELECT
+			a.id id,
+			a.product_id "product.id",
+			a.create_time createTime <!-- 创建时间-->
+		FROM t_order a
+		where a.product_id = #{productId}
+	</select>
+</mapper>

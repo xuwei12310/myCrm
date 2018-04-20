@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.TodoCopytoMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.TodoCopyto">
+		<id column="id" property="id" />
+		<result column="todo_id" property="todoId.id" />
+		<result column="copyto_user_id" property="copytoUserId.id" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		todo_id todoId, <!-- 任务-->
+		copyto_user_id copytoUserId, <!-- 抄送人-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+    
+    <select id="selectTodoCopyById" resultType="com.xuwei.bean.TodoCopyto">
+      select 
+         t.id,
+         t.todo_id,
+         t.copyto_user_id,
+         t.note
+         FROM 
+         t_todo_copyto t
+         LEFT JOIN t_todo a ON a.id=t.todo_id
+         where t.todo_id='#{TodoId}' 
+    </select>
+     <delete id="batchDeleteTodo"  parameterType="long" >
+	          DELETE  from t_todo_copyto  where todo_id=#{todoId}
+    </delete>
+    <select id="getReceiverName" resultType="com.xuwei.bean.TodoCopyto">
+		select
+		group_concat(c.id) 'copyId',
+		group_concat(c.name) 'copyName'
+		from
+		t_todo_copyto b
+		LEFT JOIN t_user c ON c.id=b.copyto_user_id
+		where 1=1 
+		<if test="data !=null">
+			and b.todo_id=#{data}
+		</if>
+		group by b.todo_id;
+	</select>
+</mapper>

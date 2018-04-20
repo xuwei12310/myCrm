@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-4.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<context:component-scan base-package="com.xuwei.controller"></context:component-scan>
+
+	<!-- 注解映射器配置 -->
+	<!-- <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"></bean> 
+		注解适配器配置 <bean class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter"></bean> -->
+
+	<!--mvc:annotation-driven代替注解映射器，适配器配置,并且默认绑定了很多参数建议使用 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>  
+        <bean class="org.springframework.http.converter.StringHttpMessageConverter">  
+            <property name="supportedMediaTypes" value="text/html;charset=utf-8"></property>  
+        </bean>  
+    </mvc:message-converters> 
+	</mvc:annotation-driven>
+
+	<!-- 处理器映射器 将bean的name作为url进行查找 ，需要在配置Handler时指定beanname -->
+
+
+	<!-- 视图解析器 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/jsp/"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+
+
+<!-- 	<bean id="validator"
+
+		class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean">
+
+		校验器
+
+		<property name="providerClass" value="org.hibernate.validator.HibernateValidator" />
+
+		指定校验使用的资源文件，如果不指定则默认使用classpath下的ValidationMessages.properties
+
+		<property name="validationMessageSource" ref="messageSource" />
+
+	</bean> -->
+
+	<!--校验错误信息配置文 -->
+
+<!-- 	<bean id="messageSource"
+
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+
+		资源文件名
+
+		<property name="basenames">
+
+			<list>
+
+				<value>
+					classpath:CustomValidationMessages
+				</value>
+
+			</list>
+
+		</property>
+
+		资源文件编码格式
+
+		<property name="fileEncodings" value="utf-8" />
+
+		对资源文件内容缓存时间，单位秒
+
+		<property name="cacheSeconds" value="120" />
+	</bean> -->
+	<!-- 多部件文件解析器，实现文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize" value="1000000" />
+		<property name="maxInMemorySize" value="4096" />
+		<property name="defaultEncoding" value="UTF-8"></property>
+	</bean>
+	<!-- <mvc:interceptors> <bean class="com.weige.interceptor.Interceptor1"></bean> 
+		<bean class="com.weige.interceptor.Interceptor2"></bean> </mvc:interceptors> -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="messageConverters">
+			<list>
+				<!--配置下载返回类型 -->
+				<bean
+					class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+				<bean
+					class="org.springframework.http.converter.StringHttpMessageConverter">
+					<!--配置编码方式 -->
+					<property name="supportedMediaTypes" value="application/json; charset=UTF-8" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+	<!-- 登录拦截器 -->
+	<!-- <mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"></mvc:mapping>
+			<bean class="edu.house.interceptor.LoginInterceptor"></bean>  
+		</mvc:interceptor>
+	</mvc:interceptors> -->
+</beans>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CustomerRelationshipMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.CustomerRelationship">
+		<id column="id" property="id" />
+		<result column="customer_id" property="customerId" />
+		<result column="name" property="name" />
+		<result column="sex" property="sex" />
+		<result column="unit" property="unit" />
+		<result column="vocation" property="vocation" />
+		<result column="relationship" property="relationship" />
+		<result column="telephone" property="telephone" />
+		<result column="id_number" property="idNumber" />
+		<result column="attach_id" property="attachId" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		id id, <!-- Id-->
+		customer_id customerId, <!-- 客户id-->
+		name name, <!-- 姓名-->
+		sex sex, <!-- 性别1男0女-->
+		unit unit, <!-- 单位-->
+		vocation vocation, <!-- 职业-->
+		relationship relationship, <!-- 关系-->
+		telephone telephone, <!-- 联系电话-->
+		id_number idNumber, <!-- 身份证号-->
+		attach_id attachId, <!-- 附件-->
+		note note, <!-- 备注-->
+		creator_id creatorId, <!-- 创建人-->
+		create_time createTime, <!-- 创建时间-->
+		last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		last_modifier_id lastModifierId, <!-- 最后修改人-->
+    </sql>
+	
+	<select id="getRelationshiList" resultType="com.xuwei.bean.CustomerRelationship">
+		select * 
+		from t_customer_relationship
+		where customer_id = #{customerid}
+	</select>
+</mapper>

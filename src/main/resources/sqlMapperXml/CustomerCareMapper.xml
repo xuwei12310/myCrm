@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.CustomerCareMapper">
+
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.CustomerCare">
+		<id column="id" property="id" />
+		<result column="customer_id" property="customer.id" />
+		<result column="care_content" property="careContent" />
+		<result column="owner" property="owner.id" />
+		<result column="details" property="details" />
+		<result column="handle_id" property="handle.id" />
+		<result column="handle_time" property="handleTime" />
+		<result column="status" property="status" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+	<select id="listCustomerCareByPage" resultType="com.xuwei.bean.CustomerCare">
+		select
+		a.id 'id',
+		a.customer_id 'customer.id',
+		b.customer_name 'customer.customerName',
+		a.care_content 'careContent',
+		a.owner 'owner.id',
+		c.username
+		'owner.username',
+		a.details 'details',
+		a.handle_id 'handle.id',
+		d.username 'handle.username',
+		a.handle_time 'handleTime',
+		a.status
+		'status',
+		a.note 'note',
+		a.creator_id 'creatorId',
+		a.create_time
+		createTime,
+		a.last_modify_time 'lastModifyTime',
+		a.last_modifier_id
+		'lastModifierId'
+		FROM t_care a
+		LEFT JOIN t_customer b on
+		b.id=a.customer_id
+		LEFT JOIN t_user c ON c.id=a.`owner`
+		LEFT JOIN t_user
+		d on d.id=a.handle_id
+		where   1 = 1 
+		<if test="viewType == 1">
+    			<if test="m.owner != null">
+    				<if test="m.owner.organization != null">
+    					<if test="m.owner.organization.id != '' and m.owner.organization.id != null">
+    						and a.creator_id IN (select j.id from t_user j where j.organization_id = #{m.owner.organization.id})
+    					</if>
+    				</if>
+    				<if test="m.owner.organization == null">
+    					<if test="m.owner.id != '' and m.owner.id != null">
+    						and a.creator_id = #{m.owner.id}
+    					</if>
+    				</if>
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+    		<if test="viewType == 2">
+    			<if test="m.owner != null and m.owner.id != '' and m.owner.id != null">
+    				and a.creator_id = #{m.owner.id}
+    			</if>
+    			<if test="m.owner == null">
+    				and 1=0
+    			</if>
+    		</if>
+        <if
+			test="m.customer != null and m.customer.customerName != '' and m.customer.customerName != null">
+			and b.customer_name like   concat("%",#{m.customer.customerName},"%")
+		</if>
+		<if
+			test="m.status!= '' and m.status != null">
+			and a.status like   concat("%",#{m.status},"%")
+		</if>
+		ORDER BY a.id DESC	
+	</select>
+	 <!-- 获取所有客户信息 -->
+	<select id="getCustemerByList" resultType="com.xuwei.bean.Customer">
+		select 
+			id, 
+			customer_name
+		from t_customer
+		where 1=1
+			<if test="customerName != null">
+				and customer_name like   concat("%",#{customerName},"%")
+			</if>
+	</select>
+	 <!-- 获取所有用户信息 -->
+	<select id="getOwnerByList" resultType="com.xuwei.bean.User">
+		select 
+			id,username,name
+		from t_user
+		where 1=1
+			<if test="userName != null">
+				and name like  concat("%",#{userName},"%")
+			</if>
+	</select>
+</mapper>

@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xuwei.mapper.OrganizationMapper">
+
+    <!-- 查询所有的部门  -->
+ 	<select id="findAll" resultType="Organization">
+        select a.*
+        from t_organization a
+    </select>
+    <!-- 通过类型查询机构信息  -->
+ 	<select id="findAllByOrgType" resultType="Organization">
+        select a.*
+        from t_organization a where a.org_type = #{orgType}
+    </select>
+    <!--<select id="findById" resultType="Organization">
+    	select a.*
+        from t_organization a
+        where a.id=#{id}
+    </select>-->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id" parameterType="Organization">
+		INSERT INTO t_organization (
+	    	organization_name, <!-- 名称 -->
+	    	parent_id, <!-- 父机构 -->
+	    	parent_ids, <!-- 父路径 -->
+	    	org_type,<!-- 机构类型 -->
+	    	array, <!-- 排序 -->
+	    	note, <!-- 备注 -->
+	    	creator_id, <!-- 创建人 -->
+	    	create_time, <!-- 创建时间 -->
+	    	last_modify_time, <!-- 最后修改时间 -->
+	    	last_modifier_id, <!-- 最后修改人 -->
+			id
+		)VALUES(
+			#{organizationName, jdbcType=VARCHAR}, <!-- 名称 -->
+			#{parentId, jdbcType=INTEGER}, <!-- 父机构 -->
+			#{parentIds, jdbcType=VARCHAR}, <!-- 父路径 -->
+			#{orgType, jdbcType=INTEGER},<!-- 机构类型 -->
+			#{array, jdbcType=INTEGER}, <!-- 排序 -->
+			#{note, jdbcType=VARCHAR}, <!-- 备注 -->
+			#{creatorId, jdbcType=INTEGER}, <!-- 创建人 -->
+			#{createTime, jdbcType=VARCHAR}, <!-- 创建时间 -->
+			#{lastModifyTime, jdbcType=VARCHAR}, <!-- 最后修改时间 -->
+			#{lastModifierId, jdbcType=INTEGER}, <!-- 最后修改人 -->
+			null
+		)
+    </insert>
+    
+    <delete id="deleteById" parameterType="java.lang.Long">
+        DELETE FROM t_organization
+        WHERE id = #{id}
+    </delete>
+    <delete id="mulDelete" parameterType="java.lang.String">
+        DELETE FROM t_organization
+        WHERE id IN
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+    </delete>
+    <update id="update" parameterType="Organization">
+      UPDATE t_organization
+	  	<set>
+			id = #{id, jdbcType=INTEGER},  <!-- 机构id -->
+			organization_name = #{organizationName, jdbcType=VARCHAR},  <!-- 名称 -->
+			parent_id = #{parentId, jdbcType=INTEGER},  <!-- 父机构 -->
+			parent_ids = #{parentIds, jdbcType=VARCHAR},  <!-- 父路径 -->
+			org_type = #{orgType, jdbcType=INTEGER},<!-- 机构类型 -->
+			array = #{array, jdbcType=INTEGER},  <!-- 排序 -->
+			note = #{note, jdbcType=VARCHAR},  <!-- 备注 -->
+			creator_id = #{creatorId, jdbcType=INTEGER},  <!-- 创建人 -->
+			create_time = #{createTime, jdbcType=VARCHAR},  <!-- 创建时间 -->
+			last_modify_time = #{lastModifyTime, jdbcType=VARCHAR},  <!-- 最后修改时间 -->
+			last_modifier_id = #{lastModifierId, jdbcType=INTEGER}  <!-- 最后修改人 -->
+      	</set>
+      WHERE id = #{id}
+    </update>
+    
+    <update id="updateByIdSelective" parameterType="Organization">
+      UPDATE t_organization
+	  	<set>
+			id = #{id, jdbcType=INTEGER},  <!-- 机构id -->
+			organization_name = #{organizationName, jdbcType=VARCHAR},  <!-- 名称 -->
+			parent_id = #{parentId, jdbcType=INTEGER},  <!-- 父机构 -->
+			parent_ids = #{parentIds, jdbcType=VARCHAR},  <!-- 父路径 -->
+			org_type = #{orgType, jdbcType=INTEGER},<!-- 机构类型 -->
+			array = #{array, jdbcType=INTEGER},  <!-- 排序 -->
+			note = #{note, jdbcType=VARCHAR},  <!-- 备注 -->
+			creator_id = #{creatorId, jdbcType=INTEGER},  <!-- 创建人 -->
+			create_time = #{createTime, jdbcType=VARCHAR},  <!-- 创建时间 -->
+			last_modify_time = #{lastModifyTime, jdbcType=VARCHAR},  <!-- 最后修改时间 -->
+			last_modifier_id = #{lastModifierId, jdbcType=INTEGER}  <!-- 最后修改人 -->
+      	</set>
+      WHERE id = #{id}
+    </update>
+    
+   <update id="updateChildrenParentIds">
+	    update t_organization 
+		set parent_ids=#{newParentIds,jdbcType=VARCHAR}
+		where parent_ids like concat(#{oldParentIds,jdbcType=VARCHAR}, '%')
+	</update>
+    
+    <!-- 树节点查询列 -->
+    <sql id="tree_columns">
+        a.id,
+        a.organization_name 'organizationName',
+        a.org_type 'orgType',
+        note,
+        a.parent_id 'parentId',
+        array,
+        (select count(f_t.id) from t_organization f_t where f_t.parent_id = a.id) hasChildren
+    </sql>
+    <select id="treeRoot" resultType="Organization">
+        SELECT  <include refid="tree_columns" />
+        FROM  t_organization a
+		WHERE a.parent_id IS NULL
+		ORDER BY array ASC
+    </select>
+    
+    <select id="treeChildren" resultType="Organization">
+        SELECT  <include refid="tree_columns" />
+        FROM  t_organization a
+		WHERE a.parent_id = #{id}
+		ORDER BY array ASC
+    </select>
+    
+    <select id="tree" resultType="Organization">
+        SELECT  <include refid="tree_columns" />
+        FROM  t_organization a
+		WHERE a.parent_ids like '0/%'
+		ORDER BY a.parent_ids ASC,a.array ASC
+    </select>
+    <select id="findByCompany" resultType="Organization">
+    	SELECT  <include refid="tree_columns" />
+        FROM  t_organization a
+        
+		WHERE a.parent_ids like concat(#{parentIds,jdbcType=VARCHAR}, '%')
+		AND a.org_type = 0
+		ORDER BY a.parent_ids ASC,a.array ASC
+    </select>
+    <sql id="Base_Column_List" >
+	   id, organization_name, org_type, array, create_time, last_modify_time, 
+	   note, parent_id, parent_ids, creator_id, last_modifier_id
+	</sql>
+	
+	<select id="findById" resultType="Organization" parameterType="long">
+        select  <include refid="Base_Column_List" />
+        from t_organization
+        where id = #{id}
+    </select>
+    
+	<select id="findChildrenByPage" resultType="Organization">
+        select <include refid="Base_Column_List" />
+		from t_organization a
+       	<include refid="findChildrenWhere" />
+    </select>
+    
+    <sql id="findChildrenWhere">
+        <where>
+        	<if test="m.id != null">
+		    	and a.parent_id = #{m.id}
+		    </if>
+	    	<if test="m.name != null and !&quot;&quot;.equals(m.name.trim())">
+		    	and a.name like  "%"#{m.name}"%"
+		    </if>
+    	</where>
+    	ORDER BY a.array ASC
+    </sql>
+    
+    <select id="nextArray" resultType="int">
+        select 
+        	case when max(array) is null then 1 
+        	else (max(array) + 1) 
+        end 
+        from t_organization 
+        where parent_id=#{pid}
+    </select>
+     <select id="findSelfAndNextSiblings" resultType="Organization">
+    	select  <include refid="Base_Column_List" />
+    	from t_organization
+   		WHERE parent_ids = #{parentIds} AND array>=#{weight} 
+		ORDER BY array ASC
+     </select>
+     <!-- <update id="updateSelftAndChild">
+	      update t_organization
+	      set 
+	      last_modify_time = #{lastModifyTime,jdbcType=VARCHAR},
+	      last_modifier_id = #{lastModifierId,jdbcType=BIGINT},
+	      note = #{note,jdbcType=VARCHAR}
+	   	  where id = #{id,jdbcType=BIGINT}
+    </update> -->
+     <update id="updateChildrenParentIds">
+	    update  t_organization
+		set parent_ids=#{newParentIds,jdbcType=VARCHAR}
+		where parent_ids like concat(#{oldParentIds,jdbcType=VARCHAR}, '%')
+	</update>
+	
+	<select id="selectByUserId" resultType="Organization">
+		select 
+		 a.id, a.organization_name, a.org_type, array, a.create_time, a.last_modify_time, 
+	     a.note, a.parent_id, a.parent_ids, a.creator_id, a.last_modifier_id
+		from t_organization a
+		left join t_user b on b.organization_id=a.id
+		where b.id=#{id}
+	</select>
+</mapper>

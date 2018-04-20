@@ -1,0 +1,23 @@
+var ${table.entityPath} = {
+    init: function (params) {
+    	app.crud.initEditDialog({});
+        app.crud.initCRUDBtn({
+        	add:function(){
+        	},
+        	update:function(){
+        	}
+        });
+    	app.crud.initViewList({
+       	 	columns:[[
+       		        {field:'ck',checkbox:true},
+#set($list=${table.fields})
+#foreach($field in $list)
+#if(${field.propertyName}!='id'&&${field.propertyName}!='createTime'&&${field.propertyName}!='creatorId'&&${field.propertyName}!='lastModifyTime'&&${field.propertyName}!='lastModifierId'&&${field.propertyName}!='note'&&${field.propertyName}!='array')
+					{field:'${field.propertyName}',title:'${field.comment}',width:100,align:'center'},
+#end
+#end
+					{field:'id',hidden:true}
+       		]]
+    	});
+    }
+}

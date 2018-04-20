@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xuwei.mapper.OrderCompanyMapper">
+
+	<!-- 通用查询映射结果 -->
+	<resultMap id="BaseResultMap" type="com.xuwei.bean.OrderCompany">
+		<id column="id" property="id" />
+		<result column="order_id" property="order.id" />
+		<result column="assessment_company_id" property="assessmentCompany.id" />
+		<result column="bank" property="bank" />
+		<result column="account" property="account" />
+		<result column="card_number" property="cardNumber" />
+		<result column="is_assessment" property="isAssessment" />
+		<result column="assessmen_fee" property="assessmenFee" />
+		<result column="fee" property="fee" />
+		<result column="is_make_bills" property="isMakeBills" />
+		<result column="note" property="note" />
+		<result column="creator_id" property="creatorId" />
+		<result column="create_time" property="createTime" />
+		<result column="last_modify_time" property="lastModifyTime" />
+		<result column="last_modifier_id" property="lastModifierId" />
+	</resultMap>
+
+     <!-- 通用查询结果列 -->
+    <sql id="baseColumns">
+		a.id id, <!-- id-->
+		a.order_id "order.id", <!-- 订单-->
+		a.assessment_company_id assessmentCompanyId, <!-- 评估公司-->
+		a.bank bank, <!-- 开户行-->
+		a.account account, <!-- 账户-->
+		a.card_number cardNumber, <!-- 卡号-->
+		a.is_assessment isAssessment, <!-- 评估结算(1是0否)-->
+		a.assessmen_fee assessmenFee, <!-- 评估费-->
+		a.fee fee, <!-- 工本费-->
+		a.is_make_bills isMakeBills, <!-- 是否生成支出单(1是0否)-->
+		a.note note, <!-- 备注-->
+		a.creator_id creatorId, <!-- 创建人-->
+		a.create_time createTime, <!-- 创建时间-->
+		a.last_modify_time lastModifyTime, <!-- 最后修改时间-->
+		a.last_modifier_id lastModifierId, <!-- 最后修改人-->
+	</sql>
+    <sql id="Base_Column_List">
+        a.id,
+        a.order_id  'order.id',
+        a.assessment_company_id  'assessmentCompany.id',
+        a.bank,
+        a.account,
+        a.card_number  'cardNumber',
+        a.is_assessment  'isAssessment',
+        a.assessmen_fee  'assessmenFee',
+        a.fee,
+        is_make_bills  'isMakeBills',
+        a.note, creator_id  'creatorId',
+        a.create_time  'createTime',
+        a.last_modify_time  'lastModifyTime',
+        a.last_modifier_id  'lastModifierId'
+    </sql>
+	 <select id="queryByPage" resultType="java.util.Map">
+		SELECT <include refid="baseColumns"/>
+		b.name, b.address,b.contacts,b.telephone
+		FROM t_order_company a
+		LEFT JOIN t_assessment_company b ON a.assessment_company_id=b.id
+		WHERE a.order_id = #{orderId}
+	</select>
+	<select id="selectAssessmentCompany" resultType="com.xuwei.bean.OrderCompany">
+		select <include refid="Base_Column_List"></include>
+		from 
+		t_order_company a
+		where order_id=#{id}
+		and is_assessment=1
+	</select>
+	<select id="selectListByPage" resultType="com.xuwei.bean.OrderCompany">
+		SELECT <include refid="baseColumns"/>
+		b.name "assessmentCompany.name",
+		b.address "assessmentCompany.address",
+		b.contacts "assessmentCompany.contacts",
+		b.telephone "assessmentCompany.telephone"
+		FROM t_order_company a
+		LEFT JOIN t_assessment_company b ON a.assessment_company_id=b.id
+		WHERE a.order_id = #{orderId}
+	</select>
+    <select id="getCompanyById" resultType="com.xuwei.bean.OrderCompany">
+		SELECT <include refid="baseColumns"/>
+		b.id "assessmentCompany.id",
+		b.name "assessmentCompany.name",
+		b.address "assessmentCompany.address",
+		b.contacts "assessmentCompany.contacts",
+		b.telephone "assessmentCompany.telephone"
+		FROM t_order_company a
+		LEFT JOIN t_assessment_company b ON a.assessment_company_id=b.id
+		WHERE a.id = #{id}
+	</select>
+</mapper>
